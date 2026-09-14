@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+<title>لوحة الإدارة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--primary:#0b6e4f;--primary-light:#1a8a6a;--primary-dark:#064e3b;--gold:#d4a745;--gold-light:#f3e5c0;--vip:#8e44ad;--success:#2ecc71;--danger:#e74c3c;--warning:#f39c12;--bg:#f8fafc;--card-bg:#fff;--text:#0f172a;--text-muted:#64748b;--border:#e9edf2;--shadow-sm:0 2px 8px rgba(0,0,0,0.04);--shadow-md:0 8px 24px rgba(0,0,0,0.06);--shadow-lg:0 16px 40px rgba(0,0,0,0.08);--radius:18px;--radius-sm:12px;--font:'Cairo',system-ui,sans-serif}
+body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl;text-align:right;min-height:100vh;padding-bottom:80px}
+#loadingScreen,#noticeScreen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);color:var(--primary);font-weight:700;gap:16px;font-family:var(--font)}
+#loadingScreen .spinner{width:44px;height:44px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#noticeScreen{display:none;color:var(--text-muted);text-align:center;padding:40px}
+#noticeScreen .ico{font-size:64px;margin-bottom:16px}
+#noticeScreen h2{font-weight:800;color:#64748b;margin-bottom:8px;font-size:1.3rem}
+header{position:sticky;top:0;z-index:1100;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);box-shadow:0 1px 4px rgba(0,0,0,0.04);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,0,0,0.03)}
+.logo{display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:900;color:var(--primary-dark)}
+.logo img{height:2.6rem;width:auto}
+.user-info{display:flex;align-items:center;gap:12px}
+.username{font-weight:600;background:var(--bg);padding:6px 14px;border-radius:40px;font-size:.85rem;color:var(--text-muted)}
+.menu-btn{background:none;border:none;font-size:1.3rem;color:var(--text-muted);cursor:pointer;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.lang-btn{background:none;border:1.5px solid var(--border);border-radius:30px;padding:5px 12px;font-family:var(--font);font-size:.75rem;font-weight:700;color:var(--primary);cursor:pointer;display:flex;align-items:center;gap:5px;transition:.2s}
+.lang-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.dropdown-menu{position:absolute;top:70px;left:16px;background:white;border-radius:var(--radius);box-shadow:var(--shadow-lg);width:290px;z-index:2000;display:none;overflow:hidden;border:1px solid var(--border)}
+.dropdown-menu button{width:100%;padding:14px 16px;text-align:right;background:none;border:none;border-bottom:1px solid var(--border);font-family:var(--font);font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:12px;cursor:pointer;color:var(--text)}
+.dropdown-menu button i{width:24px;color:var(--text-muted)}
+.dropdown-menu button:hover{background:var(--bg);color:var(--primary)}
+.dropdown-menu button:hover i{color:var(--primary)}
+.tabs{display:flex;gap:8px;padding:12px 16px;background:white;border-bottom:1px solid var(--border);overflow-x:auto;flex-wrap:nowrap}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:8px 20px;border-radius:40px;border:none;background:var(--bg);font-family:var(--font);font-weight:600;font-size:.85rem;color:var(--text-muted);cursor:pointer;white-space:nowrap}
+.tab.active{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(11,110,79,0.25)}
+.tab.landing-tab.active{background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 4px 12px rgba(124,58,237,0.25)}
+.tab.reviews-tab.active{background:linear-gradient(135deg,#0891b2,#06b6d4);box-shadow:0 4px 12px rgba(6,182,212,0.25)}
+.filter-section{padding:8px 16px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;overflow-x:auto;flex-wrap:nowrap}
+.filter-section::-webkit-scrollbar{display:none}
+.filter-btn{flex-shrink:0;padding:6px 16px;border-radius:40px;border:1px solid var(--border);background:white;font-family:var(--font);font-size:.8rem;font-weight:600;color:var(--text-muted);cursor:pointer;white-space:nowrap}
+.filter-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+.filter-count{font-size:.65rem;background:var(--bg);padding:0 8px;border-radius:30px;margin-right:4px}
+.filter-btn.active .filter-count{background:rgba(255,255,255,0.2);color:white}
+.filter-clear{flex-shrink:0;background:none;border:none;color:var(--danger);font-weight:600;font-size:.75rem;cursor:pointer;padding:4px 8px;display:none}
+.filter-clear.show{display:inline-block}
+.family-item-wrapper{display:inline-flex;align-items:center;gap:2px;position:relative}
+.family-actions{display:none;align-items:center;gap:2px;background:white;border-radius:30px;padding:2px 4px;box-shadow:var(--shadow-sm);position:absolute;left:-5px;top:50%;transform:translateY(-50%);z-index:10}
+.family-item-wrapper:hover .family-actions{display:inline-flex}
+.family-action-btn{background:none;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted)}
+.family-action-btn.edit-btn:hover{background:#eef2ff;color:var(--primary)}
+.family-action-btn.delete-btn:hover{background:#fee2e2;color:var(--danger)}
+.search-box{padding:8px 16px 12px;background:white}
+.search-box input{width:100%;padding:10px 16px;border-radius:40px;border:1px solid var(--border);background:var(--bg);font-family:var(--font);font-size:.9rem;outline:none}
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:16px}
+@media(min-width:640px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1024px){.products-grid{grid-template-columns:repeat(4,1fr)}}
+.product-card{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid var(--border);position:relative}
+.product-card img{width:100%;height:180px;object-fit:cover;background:var(--bg)}
+.product-info{padding:12px}
+.product-name{font-weight:700;font-size:.85rem;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.4rem}
+.product-price{color:var(--primary);font-weight:800;font-size:1rem;margin-bottom:4px}
+.product-wholesale-price{color:var(--vip);font-weight:600;font-size:.85rem}
+.product-box-qty{color:#2563eb;font-weight:600;font-size:.85rem}
+.product-family{font-size:.7rem;color:var(--text-muted);background:var(--bg);padding:2px 10px;border-radius:30px;display:inline-block;margin-bottom:8px}
+.product-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.btn-icon{flex:1;padding:6px 8px;border-radius:30px;border:none;font-weight:600;font-size:.72rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;font-family:var(--font)}
+.btn-edit{background:#eef2ff;color:var(--primary)}
+.btn-delete{background:#fee2e2;color:var(--danger)}
+.btn-discount{background:#fef3c7;color:#d97706}
+.btn-discount.active-discount{background:var(--danger);color:white}
+.btn-promote{background:#ede9fe;color:#7c3aed}
+.btn-promote.active-promote{background:#7c3aed;color:white}
+.product-card.on-sale{border:2px solid var(--danger);background:#fffaf5}
+.product-card.on-sale .product-price{color:var(--danger)}
+.sale-badge{position:absolute;top:8px;left:8px;background:var(--danger);color:#ffdd00;padding:4px 12px;border-radius:30px;font-weight:700;font-size:11px;z-index:5;display:flex;align-items:center;gap:4px}
+.promote-badge{position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:4px 12px;border-radius:30px;font-weight:700;font-size:11px;z-index:5;display:flex;align-items:center;gap:4px}
+.hidden-product{opacity:0.6;filter:grayscale(0.2)}
+.order-card{background:white;margin:12px 16px;padding:16px;border-radius:var(--radius);box-shadow:var(--shadow-sm);border-right:4px solid var(--primary);cursor:pointer}
+.whatsapp-orders{border-right-color:#25D366;background:#f0fdf4}
+.confirmed-card{border-right-color:var(--warning);background:#fffef7}
+.whatsapp-badge{background:#25D366;color:white;padding:2px 12px;border-radius:30px;font-size:.7rem;font-weight:600;display:inline-block;margin-right:6px}
+.confirmed-badge{background:var(--warning);color:white;padding:2px 12px;border-radius:30px;font-size:.7rem;font-weight:600;display:inline-block;margin-right:6px}
+.landing-source-badge{background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;padding:2px 12px;border-radius:30px;font-size:.7rem;font-weight:600;display:inline-block;margin-right:6px}
+.fab{position:fixed;bottom:24px;left:24px;background:var(--primary);color:white;width:56px;height:56px;border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;border:none;box-shadow:0 8px 24px rgba(11,110,79,0.35);cursor:pointer;z-index:150}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:3000;padding:20px}
+.modal.show{display:flex}
+.modal-content{background:white;width:100%;max-width:520px;border-radius:28px;padding:24px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg);position:relative}
+.modal-content h3{text-align:center;font-weight:800;margin-bottom:16px}
+.close-x{position:absolute;top:15px;left:20px;font-size:24px;cursor:pointer;color:var(--text-muted);background:none;border:none;line-height:1}
+input,select,textarea{width:100%;padding:12px 16px;margin-bottom:12px;border:1px solid var(--border);border-radius:40px;font-family:var(--font);background:var(--bg);font-size:.9rem;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(11,110,79,0.08)}
+textarea{border-radius:20px;resize:vertical;min-height:80px}
+label{font-weight:600;font-size:.85rem;display:block;margin-bottom:4px;color:var(--text)}
+.checkbox-group{display:flex;align-items:center;gap:8px;margin:8px 0;cursor:pointer}
+.checkbox-group input[type="checkbox"]{width:18px;height:18px;margin:0;cursor:pointer}
+.btn-primary{background:var(--primary);color:white;border:none;padding:12px;border-radius:40px;font-weight:700;width:100%;cursor:pointer;font-family:var(--font)}
+.btn-secondary{background:var(--bg);color:var(--text);border:1px solid var(--border);padding:12px;border-radius:40px;font-weight:600;width:100%;cursor:pointer;font-family:var(--font)}
+.btn-danger{background:var(--danger);color:white;border:none;padding:12px;border-radius:40px;font-weight:600;width:100%;cursor:pointer;font-family:var(--font)}
+.btn-success{background:var(--success);color:white;border:none;padding:12px;border-radius:40px;font-weight:600;width:100%;cursor:pointer;font-family:var(--font)}
+.btn-vip{background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;border:none;padding:12px;border-radius:40px;font-weight:700;width:100%;cursor:pointer;font-family:var(--font)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--text);color:white;padding:10px 24px;border-radius:40px;font-size:.9rem;z-index:4000;display:none;font-family:var(--font);max-width:90%;text-align:center}
+.toast.show{display:block}
+.family-field-wrapper{position:relative;width:100%;margin-bottom:12px}
+.family-field-wrapper select{padding-left:60px;appearance:none}
+.family-add-btn{position:absolute;left:8px;top:50%;transform:translateY(-50%);background:var(--primary);color:white;border:none;border-radius:30px;padding:4px 14px;font-size:.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:var(--font)}
+.date-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.section-box{display:none}
+.section-box.show{display:block}
+.discounts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding:16px}
+.no-data{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--text-muted)}
+.no-data i{font-size:3rem;display:block;margin-bottom:12px;color:#d1d5db}
+#pagination{text-align:center;margin:16px 0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+#pagination button{min-width:36px;height:36px;border:none;border-radius:var(--radius-sm);background:white;color:var(--text);font-weight:600;font-size:.85rem;box-shadow:var(--shadow-sm);cursor:pointer;font-family:var(--font)}
+#pagination button.active-page{background:var(--primary);color:white}
+footer{text-align:center;padding:16px;background:white;margin-top:30px;font-size:.75rem;color:var(--text-muted);border-top:1px solid var(--border)}
+.landing-intro{background:linear-gradient(135deg,#f3e8ff,#ede9fe);border:1px solid #ddd6fe;border-radius:var(--radius);padding:16px;margin:14px 16px;display:flex;gap:12px}
+.landing-intro .icon{width:44px;height:44px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;flex-shrink:0}
+.landing-intro h3{font-size:.95rem;font-weight:800;color:#5b21b6;margin-bottom:4px}
+.landing-intro p{font-size:.78rem;color:#6d28d9;line-height:1.5}
+.landing-list{padding:8px 16px 16px}
+.landing-item{background:white;border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);border:1px solid var(--border);display:flex;gap:12px;align-items:center}
+.landing-item img{width:64px;height:64px;object-fit:cover;border-radius:12px;background:var(--bg);flex-shrink:0}
+.landing-item .info{flex:1;min-width:0}
+.landing-item .info h4{font-weight:700;font-size:.9rem;margin-bottom:4px}
+.landing-item .info .meta{font-size:.72rem;color:var(--text-muted);display:flex;gap:10px;flex-wrap:wrap}
+.landing-item .actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.landing-item .actions button{padding:6px 12px;border:none;border-radius:30px;font-weight:700;font-size:.72rem;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.landing-edit-btn{background:#ede9fe;color:#7c3aed}
+.landing-copy-btn{background:#dbeafe;color:#2563eb}
+.landing-open-btn{background:#d1fae5;color:#065f46}
+.reviews-container{padding:14px 16px}
+.reviews-product-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+.reviews-product-header{display:flex;gap:12px;align-items:center;padding:14px;background:#f8fafc;border-bottom:1px solid var(--border)}
+.reviews-product-header img{width:54px;height:54px;object-fit:cover;border-radius:12px;background:var(--bg);flex-shrink:0}
+.reviews-product-header .rp-info{flex:1;min-width:0}
+.reviews-product-header .rp-info h4{font-weight:800;font-size:.9rem;margin-bottom:4px;color:var(--text)}
+.reviews-product-header .rp-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.7rem;color:var(--text-muted)}
+.reviews-product-header .rp-count{background:linear-gradient(135deg,#0891b2,#06b6d4);color:#fff;padding:3px 12px;border-radius:30px;font-weight:800;font-size:.72rem;display:inline-flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(6,182,212,.25)}
+.review-list{padding:6px 14px 12px}
+.review-row{padding:12px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start}
+.review-row:last-child{border-bottom:none}
+.review-row .rv-body{flex:1;min-width:0}
+.review-row .rv-head{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px}
+.review-row .rv-head .rv-author{font-weight:800;font-size:.85rem;color:var(--text);display:flex;align-items:center;gap:6px}
+.review-row .rv-head .rv-author .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;flex-shrink:0}
+.review-row .rv-head .rv-stars{color:#f59e0b;font-size:.8rem;letter-spacing:1px}
+.review-row .rv-text{font-size:.82rem;color:#475569;line-height:1.7;word-break:break-word;padding:8px 12px;background:#f8fafc;border-radius:12px;border-right:3px solid #0891b2}
+.review-row .rv-date{font-size:.68rem;color:var(--text-muted);margin-top:6px;display:flex;align-items:center;gap:5px}
+.review-row .rv-delete{flex-shrink:0;width:38px;height:38px;border:none;border-radius:12px;background:#fee2e2;color:#dc2626;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:.2s}
+.review-row .rv-delete:hover{background:#dc2626;color:#fff;transform:scale(1.05)}
+.zone-card{background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.zone-card .zone-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.zone-card .zone-head h4{font-weight:800;font-size:.9rem;color:var(--primary)}
+.zone-card .zone-info{font-size:.75rem;color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.zone-card .zone-wilayas{font-size:.72rem;color:var(--text-muted);background:#fff;padding:6px 10px;border-radius:10px;max-height:60px;overflow-y:auto}
+.zone-card .zone-actions{display:flex;gap:6px;margin-top:8px}
+.zone-card .zone-actions button{padding:6px 12px;border:none;border-radius:20px;font-weight:700;font-size:.7rem;cursor:pointer;font-family:var(--font)}
+.zone-edit-btn{background:#dbeafe;color:#2563eb}
+.zone-delete-btn{background:#fee2e2;color:#dc2626}
+.wilaya-selector{background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:12px;max-height:240px;overflow-y:auto;margin-bottom:12px}
+.wilaya-check-item{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #eef2f7;cursor:pointer;font-size:.85rem}
+.wilaya-check-item:last-child{border-bottom:none}
+.wilaya-check-item input{width:16px;height:16px;margin:0;cursor:pointer}
+.wilaya-check-item span{flex:1;font-weight:600}
+.wilaya-toolbar{display:flex;gap:6px;margin-bottom:8px}
+.wilaya-toolbar button{flex:1;padding:6px;border:none;border-radius:20px;background:#eef2ff;color:#0b6e4f;font-weight:700;font-size:.72rem;cursor:pointer;font-family:var(--font)}
+.selected-count{display:inline-block;background:#7c3aed;color:#fff;padding:2px 10px;border-radius:30px;font-size:.7rem;font-weight:700;margin-right:6px}
+.landing-images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:10px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px;padding:10px;min-height:70px}
+.landing-img-box{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#e2e8f0}
+.landing-img-box img{width:100%;height:100%;object-fit:cover;display:block}
+.landing-img-box .del-btn{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:rgba(220,38,38,.92);color:#fff;border:2px solid #fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0}
+.landing-img-box .main-tag{position:absolute;bottom:0;left:0;right:0;background:rgba(11,110,79,.92);color:#fff;font-size:9px;font-weight:800;text-align:center;padding:2px 0}
+.landing-img-empty{grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:.75rem;padding:14px 6px}
+.upload-btns-row{display:flex;gap:8px;margin-bottom:10px}
+.upload-btn{flex:1;padding:12px;border:2px dashed #cbd5e1;border-radius:14px;background:#fff;color:var(--primary);font-weight:700;font-family:var(--font);font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.upload-btn.loading{opacity:.6;pointer-events:none}
+.helper-text{font-size:.72rem;color:#1e40af;text-align:center;margin-bottom:12px;line-height:1.5;background:#eff6ff;padding:8px 10px;border-radius:10px;border:1px solid #bfdbfe}
+.dynamic-list{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px;padding:10px;margin-bottom:10px}
+.dyn-item{display:flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;margin-bottom:6px}
+.dyn-item:last-child{margin-bottom:0}
+.dyn-item .icon-btn{flex-shrink:0;width:56px;height:50px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:1.4rem;color:var(--primary);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.dyn-item .icon-btn img{width:80%;height:80%;object-fit:contain}
+.dyn-item input[type="text"]{flex:1;margin:0;padding:10px 12px;font-size:.85rem;border-radius:10px}
+.dyn-item .rm-btn{flex-shrink:0;width:38px;height:50px;border:none;border-radius:10px;background:#fee2e2;color:#dc2626;cursor:pointer;font-size:.9rem}
+.dyn-item-policy{flex-direction:column;align-items:stretch;background:#fff;padding:14px;border:1px solid var(--border);border-radius:14px;margin-bottom:10px}
+.dyn-item-policy .row{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.dyn-item-policy .row input{flex:1;margin:0;padding:12px 14px;font-size:.9rem;border-radius:12px;font-weight:700;background:#f8fafc}
+.dyn-item-policy .row .rm-btn{width:44px;height:46px;font-size:1rem;flex-shrink:0}
+.dyn-item-policy textarea{margin:0;padding:12px 14px;font-size:.85rem;border-radius:12px;min-height:110px;background:#fafafa;line-height:1.7}
+.add-item-btn{padding:12px 16px;border:none;border-radius:12px;background:#cffafe;color:#0e7490;font-weight:700;font-family:var(--font);font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;margin-top:6px;width:100%;justify-content:center;border:2px dashed #06b6d4}
+.add-item-btn:hover{background:#06b6d4;color:#fff}
+.section-label{font-weight:800;color:var(--primary);font-size:.9rem;margin:18px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--bg);display:flex;align-items:center;gap:6px}
+.section-label.vip{color:#7c3aed}
+.price-field-box{background:linear-gradient(135deg,#ecfeff,#cffafe);border:2px solid #06b6d4;border-radius:16px;padding:14px;margin:14px 0}
+.price-field-box label{color:#0e7490;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.price-field-box input{margin-bottom:6px;background:#fff;border-color:#06b6d4}
+.price-field-box input:focus{border-color:#0891b2;box-shadow:0 0 0 4px rgba(6,182,212,.15)}
+.price-field-box .hint{font-size:.72rem;color:#0e7490;line-height:1.5;background:rgba(255,255,255,.6);padding:8px 10px;border-radius:10px}
+.landing-logo-box{width:120px;height:120px;margin:0 auto 12px;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:20px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.landing-logo-box img{width:100%;height:100%;object-fit:contain;background:#fff;display:block}
+.landing-logo-box #landingLogoEmpty{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--text-muted);font-size:.72rem;font-weight:600;text-align:center;padding:8px}
+.landing-logo-box #landingLogoEmpty i{font-size:2rem;color:#cbd5e1;display:block}
+.store-logo-box{width:140px;height:140px;margin:6px auto 12px;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:20px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.store-logo-box img{width:100%;height:100%;object-fit:contain;background:#fff;display:block}
+.store-logo-box #storeLogoEmpty{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--text-muted);font-size:.75rem;font-weight:600;text-align:center;padding:8px}
+.store-logo-box #storeLogoEmpty i{font-size:2.2rem;color:#cbd5e1;display:block}
+.icon-picker{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(8px);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px}
+.icon-picker.show{display:flex}
+.icon-picker-content{background:#fff;width:100%;max-width:560px;border-radius:24px;padding:20px;max-height:85vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-lg)}
+.icon-picker h3{text-align:center;font-weight:800;margin-bottom:14px;color:var(--primary)}
+.icon-picker .cats{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:6px}
+.icon-picker .cats::-webkit-scrollbar{display:none}
+.icon-picker .cats button{flex-shrink:0;padding:6px 14px;border:1px solid var(--border);border-radius:30px;background:#fff;font-family:var(--font);font-size:.75rem;font-weight:700;color:var(--text-muted);cursor:pointer;white-space:nowrap}
+.icon-picker .cats button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.icon-picker .icons-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-bottom:14px}
+.icon-picker .icons-grid button{aspect-ratio:1/1;border:1.5px solid var(--border);border-radius:14px;background:#f8fafc;color:var(--primary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:.15s;padding:0}
+.icon-picker .icons-grid button:hover{background:#f0fdf4;border-color:var(--primary);transform:translateY(-2px)}
+.icon-picker .upload-custom{width:100%;padding:12px;border:2px dashed #cbd5e1;border-radius:12px;background:#fff;color:var(--primary);font-weight:700;font-family:var(--font);font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+@media(max-width:640px){
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:10px}
+  .product-card img{height:140px}
+  .product-info{padding:8px}
+  .product-name{font-size:.75rem;height:2rem}
+  .btn-icon{font-size:.65rem;padding:4px 6px}
+  .tab{font-size:.75rem;padding:6px 14px}
+  .modal-content{padding:16px}
+}
+/* ═══ 🎨 توحيد شكل جميع النوافذ (Modals) ═══ */
+.modal-content{border-radius:24px!important;padding:26px 22px!important;box-shadow:0 20px 60px rgba(15,23,42,.18)!important;position:relative!important}
+.modal-content h3{color:var(--primary-dark)!important;font-weight:800!important;font-size:1.15rem!important;margin-bottom:20px!important;padding-bottom:14px!important;border-bottom:2px solid var(--bg)!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;text-align:center!important}
+.modal-content h3 i{color:var(--primary)!important;font-size:1.1rem!important}
+.modal-content input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),.modal-content select,.modal-content textarea{border-radius:14px!important;padding:12px 16px!important;background:#f8fafc!important;border:1.5px solid var(--border)!important;margin-bottom:12px!important;font-size:.9rem!important;transition:.2s!important}
+.modal-content input:focus,.modal-content select:focus,.modal-content textarea:focus{border-color:var(--primary)!important;background:#fff!important;box-shadow:0 0 0 4px rgba(11,110,79,.08)!important}
+.modal-content label{font-size:.82rem!important;font-weight:700!important;color:#334155!important;margin-bottom:6px!important}
+.modal-content label i{color:var(--primary)!important;margin-left:4px!important}
+.modal-content .btn-primary,.modal-content .btn-vip,.modal-content .btn-success,.modal-content .btn-danger,.modal-content .btn-secondary{border-radius:40px!important;padding:13px 20px!important;font-weight:800!important;font-size:.92rem!important;border:none!important;cursor:pointer!important;font-family:var(--font)!important;transition:all .2s!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;box-shadow:0 6px 16px rgba(11,110,79,.2)!important;margin-top:6px!important}
+.modal-content .btn-primary:hover,.modal-content .btn-vip:hover,.modal-content .btn-success:hover,.modal-content .btn-danger:hover,.modal-content .btn-secondary:hover{transform:translateY(-2px)!important;box-shadow:0 10px 24px rgba(11,110,79,.3)!important}
+.modal-content .btn-primary,.modal-content .btn-vip,.modal-content .btn-success{background:linear-gradient(135deg,var(--primary),var(--primary-light))!important;color:#fff!important}
+.modal-content .btn-danger{background:var(--danger)!important;color:#fff!important;box-shadow:0 6px 16px rgba(231,76,60,.25)!important}
+.modal-content .btn-secondary{background:var(--bg)!important;color:var(--text)!important;border:1.5px solid var(--border)!important;box-shadow:none!important}
+.modal-content .close-x{position:absolute!important;top:16px!important;left:18px!important;width:36px!important;height:36px!important;border-radius:50%!important;background:#f1f5f9!important;color:var(--text-muted)!important;font-size:22px!important;display:flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;transition:all .25s!important;line-height:1!important;padding:0!important;border:none!important}
+.modal-content .close-x:hover{background:var(--danger)!important;color:#fff!important;transform:rotate(90deg)!important}
+.modal-content .section-label{font-size:.88rem!important;font-weight:800!important;color:var(--primary)!important;margin:18px 0 10px!important;padding-bottom:8px!important;border-bottom:2px solid var(--bg)!important;display:flex!important;align-items:center!important;gap:6px!important}
+.modal-content .helper-text{background:#f0fdf4!important;border:1.5px solid #bbf7d0!important;color:#065f46!important;border-radius:12px!important;padding:10px 12px!important;font-size:.75rem!important;margin-bottom:12px!important}
+.modal-content .upload-btn{border:2px dashed #cbd5e1!important;background:#fff!important;color:var(--primary)!important}
+.modal-content .upload-btn:hover{border-color:var(--primary)!important;background:#f0fdf4!important}
+</style>
+</head>
+<body>
+
+<div id="loadingScreen"><div class="spinner"></div><div data-t="loading">جاري التحميل...</div></div>
+<div id="noticeScreen"></div>
+
+<div id="appContainer" style="display:none;">
+
+<header>
+  <div class="logo">
+    <img id="headerLogo" style="display:none;" alt="" />
+    <span id="headerStoreName">...</span>
+  </div>
+  <div class="user-info">
+    <span class="username" id="userNameDisplay"></span>
+    <button class="lang-btn" id="langToggleBtn" type="button" title="Français / العربية">
+      <i class="fas fa-globe"></i>
+      <span id="langBtnLabel">FR</span>
+    </button>
+    <button class="menu-btn" id="menuToggleBtn"><i class="fas fa-ellipsis-h"></i></button>
+  </div>
+</header>
+
+<div class="dropdown-menu" id="dropdownMenu">
+  <button id="btnCover"><i class="fas fa-image"></i> <span data-t="mCover">تغيير الغلاف</span></button>
+  <button id="btnSetup"><i class="fas fa-cog" style="color:#3b82f6;"></i> <span data-t="mSetup">معالج الإعداد (setup)</span></button>
+  <input type="file" id="coverFileInput" accept="image/*" style="display:none;" />
+  <button id="btnStoreSettings"><i class="fas fa-store"></i> <span data-t="mStoreSettings">إعدادات المتجر</span></button>
+  <button id="btnShippingZones"><i class="fas fa-truck"></i> <span data-t="mShippingZones">مناطق الشحن</span></button>
+  <button id="btnLandingSettings"><i class="fas fa-rocket" style="color:#7c3aed;"></i> <span data-t="mLandingSettings">إعدادات صفحات الترويج</span></button>
+  <button id="btnPixels"><i class="fas fa-chart-line" style="color:#1877f2;"></i> <span data-t="mPixels">إعدادات البكسل (FB + TikTok)</span></button>
+  <button id="btnPolicies"><i class="fas fa-file-contract" style="color:#0891b2;"></i> <span data-t="mPolicies">سياسات المتجر</span></button>
+  <button id="btnUsers"><i class="fas fa-users"></i> <span data-t="mUsers">إدارة المستخدمين</span></button>
+  <button id="btnOwnerSettings"><i class="fas fa-crown"></i> <span data-t="mOwnerSettings">إعدادات المالك</span></button>
+  <button id="btnWholesaleCode"><i class="fas fa-key"></i> <span data-t="mWholesaleCode">الرقم السري للجملة</span></button>
+  <button id="btnExcelImport"><i class="fas fa-file-excel" style="color:#27ae60;"></i> <span data-t="mExcelImport">استيراد من إكسل</span></button>
+  <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none;" />
+  <button id="btnDeleteAllProducts"><i class="fas fa-trash-alt"></i> <span data-t="mDeleteAll">حذف كل المنتجات</span></button>
+  <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> <span data-t="mLogout">تسجيل الخروج</span></button>
+</div>
+
+<div class="tabs" id="tabsContainer">
+  <button class="tab active" data-tab="products" data-t="tProducts">📦 المنتجات</button>
+  <button class="tab landing-tab" data-tab="landing" data-t="tLanding">🚀 صفحات الترويج</button>
+  <button class="tab" data-tab="discounts" data-t="tDiscounts">🏷️ التخفيضات</button>
+  <button class="tab" data-tab="hidden" data-t="tHidden">🔒 المخفية</button>
+  <button class="tab reviews-tab" data-tab="reviews"><span data-t="tReviews">💬 التقييمات</span> <span id="reviewsBadge" style="display:none;background:#0891b2;border-radius:20px;padding:2px 8px;font-size:.7rem;margin-right:4px;">0</span></button>
+  <button class="tab" data-tab="whatsapp"><span data-t="tWhatsapp">💚 الطلبات</span> <span id="whatsappBadge" style="display:none;background:#25D366;color:white;border-radius:50%;padding:2px 8px;font-size:.7rem;margin-right:4px;">0</span></button>
+  <button class="tab" data-tab="confirmed"><span data-t="tConfirmed">✅ المؤكدة</span> <span id="confirmedBadge" style="display:none;background:var(--warning);border-radius:20px;padding:2px 8px;font-size:.7rem;margin-right:4px;">0</span></button>
+</div>
+
+<div id="productsSection" class="section-box show">
+  <div class="filter-section" id="familyFilterSection">
+    <button class="filter-btn active" data-family="الكل" id="filterAll"><i class="fas fa-th-list"></i> <span data-t="all">الكل</span> <span class="filter-count" id="countAll">0</span></button>
+    <button class="filter-clear" id="clearFilterBtn"><i class="fas fa-times"></i> <span data-t="clear">إلغاء</span></button>
+  </div>
+  <div class="search-box"><input type="text" id="searchInput" data-t-placeholder="searchPlaceholder" placeholder="🔍 بحث..." /></div>
+  <div id="coverBanner" style="display:none;padding:12px;"><img id="coverImage" style="width:100%;border-radius:var(--radius);max-height:180px;object-fit:cover;" /></div>
+  <div class="products-grid" id="productsContainer"></div>
+  <div id="pagination"></div>
+</div>
+
+<div id="landingSection" class="section-box">
+  <div class="landing-intro">
+    <div class="icon"><i class="fas fa-rocket"></i></div>
+    <div>
+      <h3 data-t="landingTitle">🚀 صفحات الترويج المستقلة</h3>
+      <p data-t="landingDesc">تظهر هنا <b>المنتجات المُفعَّلة فقط</b>. لتفعيل منتج، اذهب إلى <b>📦 المنتجات</b> واضغط على زر 🚀.</p>
+    </div>
+  </div>
+  <div class="landing-list" id="landingListContainer"></div>
+</div>
+
+<div id="discountsSection" class="section-box">
+  <div style="padding:12px;background:var(--gold-light);margin:12px;border-radius:var(--radius);text-align:center;">
+    <i class="fas fa-tags" style="color:var(--gold);"></i>
+    <span style="font-weight:700;margin-right:8px;" data-t="discountsMgmt">إدارة التخفيضات</span>
+  </div>
+  <div class="discounts-grid" id="discountsContainer"></div>
+</div>
+
+<div id="hiddenSection" class="section-box"><div class="products-grid" id="hiddenProductsContainer"></div></div>
+
+<div id="reviewsSection" class="section-box">
+  <div class="reviews-container" id="reviewsListContainer"></div>
+</div>
+
+<div id="whatsappSection" class="section-box"><div id="whatsappOrdersContainer"></div></div>
+<div id="confirmedSection" class="section-box">
+  <div style="text-align:center;margin:12px;"><button id="deleteAllConfirmedBtn" style="background:var(--danger);color:white;border:none;padding:10px 20px;border-radius:40px;font-weight:700;cursor:pointer;font-family:var(--font);" data-t="delAllConfirmed">🗑️ حذف جميع الطلبات المؤكدة</button></div>
+  <div id="confirmedOrdersContainer"></div>
+</div>
+
+<button class="fab" id="addProductBtn" style="display:none;">+</button>
+
+<div id="loginModal" class="modal show">
+  <div class="modal-content" style="text-align:center;">
+    <img id="loginLogo" style="width:80px;margin-bottom:16px;display:none;" />
+    <h3 data-t="loginTitle">تسجيل الدخول</h3>
+    <input type="text" id="adminUser" data-t-placeholder="loginUser" placeholder="اسم المستخدم" />
+    <input type="password" id="adminPassword" data-t-placeholder="loginPass" placeholder="كلمة المرور" />
+    <button class="btn-primary" id="loginBtn" data-t="loginBtn">دخول</button>
+  </div>
+</div>
+
+<div id="storeSettingsModal" class="modal">
+  <div class="modal-content">
+    <button class="close-x" data-close="storeSettingsModal">&times;</button>
+    <h3><i class="fas fa-store"></i> <span data-t="storeSettingsTitle">إعدادات المتجر</span></h3>
+    <label data-t="storeName">اسم المتجر</label><input id="setStoreName" />
+    <label data-t="storeAddress">عنوان المتجر</label><input id="setAddress" />
+    <label data-t="storePhone">رقم الهاتف (يظهر للعملاء للاتصال)</label><input id="setPhone" />
+    <label data-t="storeWhatsapp">رقم واتساب (لاستقبال الطلبات — يمكنك إدخال: رقم الهاتف)</label>
+    <input id="setWhatsapp" dir="ltr" placeholder="رقم الهاتف" />
+    <label data-t="imgbbKey">مفتاح ImgBB (لرفع الصور)</label><input id="setImgbb" dir="ltr" />
+    <label data-t="currency">العملة</label><input id="setCurrency" placeholder="دج" />
+
+    <span class="section-label"><i class="fas fa-image"></i> <span data-t="storeLogoLabel">شعار المتجر</span></span>
+    <div class="helper-text"><i class="fas fa-info-circle"></i> <span data-t="storeLogoHelp">ارفع شعاراً من هاتفك. سيظهر في كل الصفحات (المتجر، الفواتير، صفحات الترويج).</span></div>
+    <div class="store-logo-box">
+      <img id="storeLogoPreview" src="" style="display:none;" />
+      <div id="storeLogoEmpty">
+        <i class="fas fa-store"></i>
+        <span data-t="noLogo">لا يوجد شعار</span>
+      </div>
+    </div>
+    <div class="upload-btns-row">
+      <input type="file" id="storeLogoFile" accept="image/*" style="display:none;" />
+      <input type="file" id="storeLogoCamera" accept="image/*" capture="environment" style="display:none;" />
+      <button type="button" class="upload-btn" id="btnStoreLogoGallery"><i class="fas fa-images"></i> <span data-t="fromGallery">من المعرض</span></button>
+      <button type="button" class="upload-btn" id="btnStoreLogoCamera"><i class="fas fa-camera"></i> <span data-t="camera">كاميرا</span></button>
+      <button type="button" class="upload-btn" id="btnStoreLogoRemove" style="color:#dc2626;border-color:#fecaca;flex:0 0 auto;padding:12px 14px;"><i class="fas fa-trash"></i></button>
+    </div>
+
+    <label class="checkbox-group"><input type="checkbox" id="setEnableWhatsapp" /><span data-t="enableWhatsapp">تفعيل الطلبات عبر واتساب</span></label>
+    <label class="checkbox-group"><input type="checkbox" id="setEnableLocation" /><span data-t="enableLocation">تفعيل زر GPS</span></label>
+    <button class="btn-primary" id="saveStoreSettingsBtn" style="margin-top:12px;" data-t="saveBtn">💾 حفظ</button>
+  </div>
+</div>
+
+<div id="landingSettingsModal" class="modal">
+  <div class="modal-content">
+    <button class="close-x" data-close="landingSettingsModal">&times;</button>
+    <h3 style="color:#7c3aed;"><i class="fas fa-rocket"></i> <span data-t="landingSettingsTitle">إعدادات صفحات الترويج</span></h3>
+    <label data-t="announcementBar">نص الشريط الإعلاني العلوي</label>
+    <input id="landingAnnouncement" placeholder="✨" />
+    <hr style="margin:16px 0;border:none;border-top:1px solid var(--border);">
+    <label class="checkbox-group"><input type="checkbox" id="landingEnableReviews" /><span data-t="showReviews">إظهار التقييمات</span></label>
+    <label class="checkbox-group"><input type="checkbox" id="landingEnableVisitors" /><span data-t="showVisitors">إظهار عداد الزوار</span></label>
+    <button class="btn-vip" id="saveLandingSettingsBtn" style="margin-top:14px;" data-t="saveBtn">💾 حفظ</button>
+  </div>
+</div>
+
+<!-- ═══ 🎯 نافذة إعدادات البكسل (Facebook + TikTok) ═══ -->
+<div id="pixelsModal" class="modal">
+  <div class="modal-content" style="max-width:560px;">
+    <button class="close-x" data-close="pixelsModal">&times;</button>
+    <h3 style="color:#1877f2;"><i class="fas fa-chart-line"></i> <span data-t="pixelsTitle">إعدادات البكسل</span></h3>
+
+    <div class="helper-text" style="text-align:right;line-height:1.7;">
+      <i class="fas fa-info-circle"></i> <span data-t="pixelsGlobalHelp">الـ Pixel عام لكل صفحات الترويج. لإضافة Pixel خاص بمنتج معيّن، اذهب إلى "تعديل صفحة الترويج".</span>
+    </div>
+
+    <!-- ═══ Facebook Pixel ═══ -->
+    <span class="section-label" style="color:#1877f2;border-color:#dbeafe;">
+      <i class="fab fa-facebook" style="color:#1877f2;"></i> Facebook Pixel
+    </span>
+
+    <label class="checkbox-group" style="margin-bottom:10px;">
+      <input type="checkbox" id="pixelEnableFB" />
+      <span style="font-weight:700;" data-t="enableFacebookPixel">تفعيل Facebook Pixel</span>
+    </label>
+
+    <label>Facebook Pixel ID</label>
+    <input id="pixelFBId" dir="ltr" placeholder="123456789012345" style="font-family:monospace;" />
+    <div class="helper-text" style="text-align:right;margin-top:-6px;">
+      <i class="fas fa-link"></i> <a href="https://business.facebook.com/events_manager" target="_blank" style="color:#1877f2;">Events Manager</a> → Pixel ID
+    </div>
+
+    <hr style="margin:18px 0;border:none;border-top:2px dashed #e5e7eb;">
+
+    <!-- ═══ TikTok Pixel ═══ -->
+    <span class="section-label" style="color:#000;border-color:#f3f4f6;">
+      <i class="fab fa-tiktok" style="color:#000;"></i> TikTok Pixel
+    </span>
+
+    <label class="checkbox-group" style="margin-bottom:10px;">
+      <input type="checkbox" id="pixelEnableTT" />
+      <span style="font-weight:700;" data-t="enableTiktokPixel">تفعيل TikTok Pixel</span>
+    </label>
+
+    <label>TikTok Pixel ID</label>
+    <input id="pixelTTId" dir="ltr" placeholder="C1A2B3D4E5F6G7H8" style="font-family:monospace;" />
+    <div class="helper-text" style="text-align:right;margin-top:-6px;">
+      <i class="fas fa-link"></i> <a href="https://ads.tiktok.com/i18n/dashboard" target="_blank" style="color:#000;">TikTok Ads Manager</a> → Events → Pixel ID
+    </div>
+
+    <button class="btn-primary" id="savePixelsBtn" style="margin-top:18px;background:linear-gradient(135deg,#1877f2,#000);" data-t="savePixelsBtn">💾 حفظ الإعدادات</button>
+  </div>
+</div>
+
+<div id="policiesModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <button class="close-x" data-close="policiesModal">&times;</button>
+    <h3 style="color:#0891b2;"><i class="fas fa-file-contract"></i> <span data-t="policiesTitle">سياسات المتجر</span></h3>
+    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:16px;line-height:1.6;text-align:center;background:#ecfeff;padding:10px;border-radius:12px;" data-t="policiesHelp">
+      💡 أضف سياسات المتجر. كل سياسة تحتوي على <b>عنوان</b> + <b>نص الشرح</b>.
+    </p>
+    <div id="policiesListContainer"></div>
+    <button type="button" class="add-item-btn" id="addPolicyBtn" style="margin-top:10px;"><i class="fas fa-plus"></i> <span data-t="addPolicyBtn">إضافة سياسة جديدة</span></button>
+    <button class="btn-primary" id="savePoliciesBtn" style="margin-top:16px;background:linear-gradient(135deg,#0891b2,#06b6d4);" data-t="savePoliciesBtn">💾 حفظ السياسات</button>
+  </div>
+</div>
+
+<div id="shippingZonesModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <button class="close-x" data-close="shippingZonesModal">&times;</button>
+    <h3><i class="fas fa-truck"></i> <span data-t="shippingZonesTitle">مناطق الشحن</span></h3>
+    <button class="btn-primary" id="addZoneBtn" style="margin-bottom:14px;" data-t="addZoneBtn">➕ إضافة منطقة</button>
+    <div id="zonesListContainer"></div>
+  </div>
+</div>
+
+<div id="zoneEditModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <button class="close-x" data-close="zoneEditModal">&times;</button>
+    <h3 id="zoneEditTitle"><i class="fas fa-map-marked-alt"></i> <span data-t="zoneTitle">منطقة شحن</span></h3>
+    <input type="hidden" id="zoneEditId" />
+    <label data-t="zoneName">اسم المنطقة</label><input id="zoneName" />
+    <label data-t="zoneHomePrice">سعر للمنزل (دج)</label><input type="number" id="zoneHomePrice" min="0" />
+    <label data-t="zoneDeskPrice">سعر للمكتب (دج)</label><input type="number" id="zoneDeskPrice" min="0" />
+    <label><span data-t="zoneWilayas">الولايات</span> <span class="selected-count" id="selectedWilayaCount">0</span></label>
+    <div class="wilaya-toolbar">
+      <button type="button" id="selectAllWilayas" data-t="selectAll">تحديد الكل</button>
+      <button type="button" id="clearAllWilayas" data-t="clearAll">إلغاء الكل</button>
+    </div>
+    <div class="wilaya-selector" id="wilayaSelector"></div>
+    <button class="btn-primary" id="saveZoneBtn" data-t="saveBtn">💾 حفظ</button>
+  </div>
+</div>
+
+<div id="landingEditModal" class="modal">
+  <div class="modal-content" style="max-width:640px;">
+    <button class="close-x" data-close="landingEditModal">&times;</button>
+    <h3 style="color:#7c3aed;"><i class="fas fa-rocket"></i> <span data-t="landingEditTitle">تعديل صفحة الترويج</span></h3>
+    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px;"><span data-t="originalProduct">المنتج الأصلي:</span> <b id="landingEditProductName" style="color:var(--primary);"></b></p>
+    <input type="hidden" id="landingEditProductId" />
+    <label class="checkbox-group"><input type="checkbox" id="landingEnabled" /><span style="font-weight:700;" data-t="enableLanding">تفعيل صفحة الترويج</span></label>
+
+    <span class="section-label vip"><i class="fas fa-image"></i> <span data-t="landingLogo">شعار الصفحة</span></span>
+    <div class="helper-text"><i class="fas fa-info-circle"></i> <span data-t="landingLogoHelp">ارفع شعاراً خاصاً لصفحة الترويج. إذا لم تُضف → شعار المتجر الأساسي يُستخدم.</span></div>
+    <div class="landing-logo-box">
+      <img id="landingLogoPreview" src="" style="display:none;" />
+      <div id="landingLogoEmpty">
+        <i class="fas fa-store"></i>
+        <span data-t="noLogo">لا يوجد شعار</span>
+      </div>
+    </div>
+    <div class="upload-btns-row">
+      <input type="file" id="landingLogoFile" accept="image/*" style="display:none;" />
+      <input type="file" id="landingLogoCamera" accept="image/*" capture="environment" style="display:none;" />
+      <button type="button" class="upload-btn" id="btnUploadLogoGallery"><i class="fas fa-images"></i> <span data-t="fromGallery">من المعرض</span></button>
+      <button type="button" class="upload-btn" id="btnUploadLogoCamera"><i class="fas fa-camera"></i> <span data-t="camera">كاميرا</span></button>
+      <button type="button" class="upload-btn" id="btnRemoveLogo" style="color:#dc2626;border-color:#fecaca;flex:0 0 auto;padding:12px 14px;"><i class="fas fa-trash"></i></button>
+    </div>
+
+    <span class="section-label vip"><i class="fas fa-heading"></i> <span data-t="visibleTexts">النصوص الظاهرة</span></span>
+    <label data-t="pageNameLabel">اسم الصفحة (يظهر بجانب الشعار)</label>
+    <input id="landingPageName" placeholder="..." />
+    <label data-t="productNameLabel">اسم المنتج</label>
+    <input id="landingProductName" data-t-placeholder="productNamePlaceholder" placeholder="اتركه فارغاً لاستخدام اسم المنتج الأصلي" />
+
+    <div class="price-field-box">
+      <label><i class="fas fa-tag"></i> <span data-t="landingPriceLabel">سعر خاص لصفحة الترويج</span></label>
+      <input type="number" id="landingPrice" data-t-placeholder="landingPricePlaceholder" placeholder="اتركه فارغاً لاستخدام السعر الأصلي" min="0" />
+      <p class="hint" data-t="landingPriceHint">💡 هذا السعر <b>منفصل تماماً</b>. سيظهر <b>فقط</b> في صفحة الترويج.</p>
+    </div>
+
+    <label data-t="announcementItemLabel">نص الشريط الإعلاني (اختياري)</label><input id="landingAnnouncementItem" data-t-placeholder="optionalPlaceholder" placeholder="اتركه فارغاً للعام" />
+    <label data-t="descriptionLabel">وصف المنتج</label><textarea id="landingDescription" rows="4"></textarea>
+
+    <span class="section-label vip"><i class="fas fa-images"></i> <span data-t="landingImages">صور صفحة الترويج</span></span>
+    <div class="helper-text"><i class="fas fa-info-circle"></i> <span data-t="landingImagesHelp">ارفع صوراً متعددة. إذا لم تُضف → الصورة الأساسية تُستخدم.</span></div>
+    <div class="landing-images-grid" id="landingImagesGrid"><div class="landing-img-empty" data-t="noImagesYet">لا توجد صور بعد</div></div>
+    <div class="upload-btns-row">
+      <input type="file" id="landingImageFile" accept="image/*" multiple style="display:none;" />
+      <input type="file" id="landingCameraInput" accept="image/*" capture="environment" style="display:none;" />
+      <button type="button" class="upload-btn" id="btnUploadGallery"><i class="fas fa-images"></i> <span data-t="fromGallery">من المعرض</span></button>
+      <button type="button" class="upload-btn" id="btnUploadCamera"><i class="fas fa-camera"></i> <span data-t="camera">كاميرا</span></button>
+    </div>
+
+    <span class="section-label vip"><i class="fas fa-star"></i> <span data-t="featuresTitle">لماذا تختارنا؟ (المميزات)</span></span>
+    <div class="helper-text"><i class="fas fa-lightbulb"></i> <span data-t="featuresHelp">كل ميزة: أيقونة + عبارة صغيرة</span></div>
+    <div class="dynamic-list" id="featuresList"></div>
+    <button type="button" class="add-item-btn" id="addFeatureBtn"><i class="fas fa-plus"></i> <span data-t="addFeatureBtn">إضافة ميزة</span></button>
+
+    <span class="section-label vip"><i class="fas fa-chart-line"></i> <span data-t="productPixelSection">بكسل خاص بهذا المنتج (اختياري)</span></span>
+    <div class="helper-text"><i class="fas fa-info-circle"></i> <span data-t="productPixelHelp">إذا تركتها فارغة، سيتم استخدام البكسل العام.</span></div>
+    <label><i class="fab fa-facebook" style="color:#1877f2;"></i> Facebook Pixel ID</label>
+    <input id="landingItemPixel" data-t-placeholder="optionalPlaceholder" placeholder="اتركه فارغاً للعام" dir="ltr" style="font-family:monospace;" />
+    <label><i class="fab fa-tiktok" style="color:#000;"></i> TikTok Pixel ID</label>
+    <input id="landingItemTiktokPixel" data-t-placeholder="optionalPlaceholder" placeholder="اتركه فارغاً للعام" dir="ltr" style="font-family:monospace;" />
+
+    <label class="checkbox-group"><input type="checkbox" id="landingShowReviews" /><span data-t="showReviews">إظهار التقييمات</span></label>
+    <label class="checkbox-group"><input type="checkbox" id="landingShowVisitors" /><span data-t="showVisitors">إظهار عداد الزوار</span></label>
+
+    <div id="landingUrlBox" style="background:#f3e8ff;border:1px solid #ddd6fe;border-radius:14px;padding:12px;margin:14px 0;display:none;">
+      <label style="color:#5b21b6;font-weight:800;margin-bottom:6px;display:block;"><i class="fas fa-link"></i> <span data-t="pageUrl">رابط الصفحة</span></label>
+      <input id="landingUrl" readonly dir="ltr" style="background:#fff;font-family:monospace;font-size:.75rem;" />
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button type="button" id="copyLandingUrl" class="btn-success" style="flex:1;padding:10px;font-size:.8rem;" data-t="copyBtn">📋 نسخ</button>
+        <button type="button" id="openLandingUrl" class="btn-primary" style="flex:1;padding:10px;font-size:.8rem;background:#7c3aed;" data-t="openBtn">🔗 فتح</button>
+      </div>
+    </div>
+    <button class="btn-vip" id="saveLandingBtn" data-t="saveBtn">💾 حفظ</button>
+  </div>
+</div>
+
+<div id="productModal" class="modal">
+  <div class="modal-content">
+    <button class="close-x" data-close="productModal">&times;</button>
+    <h3 id="formTitle" style="color:var(--primary);">إضافة منتج</h3>
+    <form id="productForm">
+      <input type="hidden" id="editId" />
+      <input type="text" id="name" data-t-placeholder="productNameField" placeholder="اسم المنتج" required />
+      <input type="number" id="price" data-t-placeholder="priceField" placeholder="سعر البيع (دج)" required />
+      <input type="number" id="wholesalePrice" data-t-placeholder="wholesaleField" placeholder="سعر الجملة (اختياري)" />
+      <input type="number" id="quantityPerBox" data-t-placeholder="qtyPerBoxField" placeholder="الكمية في العلبة (اختياري)" min="0" />
+      <div class="family-field-wrapper">
+        <select id="familySelect"><option value="" data-t="chooseFamily">-- اختر عائلة --</option></select>
+        <button type="button" class="family-add-btn" id="addFamilyBtn"><i class="fas fa-plus"></i> <span data-t="addBtn">إضافة</span></button>
+      </div>
+      <input type="text" id="newFamilyInput" data-t-placeholder="newFamilyPlaceholder" placeholder="اسم العائلة الجديدة" style="display:none;" />
+      <div style="display:flex;gap:8px;">
+        <input type="file" id="imageFile" accept="image/*" style="flex:1;" />
+        <label for="cameraInput" style="background:var(--bg);padding:12px;border-radius:40px;cursor:pointer;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;width:48px;margin-bottom:12px;"><i class="fas fa-camera"></i></label>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" />
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button type="submit" class="btn-primary" data-t="saveBtn">💾 حفظ</button>
+        <button type="button" id="toggleVisibilityBtn" style="display:none;background:var(--warning);color:white;border:none;border-radius:40px;padding:0 16px;font-weight:700;cursor:pointer;font-family:var(--font);">👁️</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="discountModal" class="modal">
+  <div class="modal-content">
+    <button class="close-x" data-close="discountModal">&times;</button>
+    <h3 style="color:var(--danger);" data-t="discountTitle">🏷️ إدارة التخفيض</h3>
+    <input type="hidden" id="discountProductId" />
+    <label><span data-t="productLabel">المنتج:</span> <span id="discountProductName"></span></label>
+    <label data-t="newPriceLabel">السعر بعد التخفيض</label><input type="number" id="discountNewPrice" required />
+    <label class="checkbox-group"><input type="checkbox" id="discountUnlimited" /><span data-t="unlimitedDiscount">تخفيض دائم</span></label>
+    <div id="discountDateGroup">
+      <label data-t="durationLabel">المدة</label>
+      <div class="date-fields">
+        <div><label style="font-weight:400;font-size:.75rem;" data-t="fromLabel">من</label><input type="datetime-local" id="discountStartDate" /></div>
+        <div><label style="font-weight:400;font-size:.75rem;" data-t="toLabel">إلى</label><input type="datetime-local" id="discountEndDate" /></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button type="button" id="saveDiscountBtn" class="btn-success" style="flex:2;" data-t="saveBtn">💾 حفظ</button>
+      <button type="button" id="removeDiscountBtn" class="btn-danger" style="flex:1;display:none;" data-t="removeBtn">🗑️ إزالة</button>
+    </div>
+  </div>
+</div>
+
+<div id="usersModal" class="modal">
+  <div class="modal-content">
+    <button class="close-x" data-close="usersModal">&times;</button>
+    <h3 data-t="usersTitle">👥 إدارة المستخدمين</h3>
+    <input id="newUserName" data-t-placeholder="newUserName" placeholder="اسم المستخدم" />
+    <input id="newUserPass" data-t-placeholder="newUserPass" placeholder="كلمة المرور" />
+    <label class="checkbox-group"><input type="checkbox" id="isAdminCheck" /><span data-t="isAdmin">مدير (Admin)</span></label>
+    <button id="addUserBtn" class="btn-primary" style="margin-bottom:12px;" data-t="addUserBtn">➕ إضافة</button>
+    <div id="usersList" style="max-height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;"></div>
+    <button class="btn-danger" data-close="usersModal" style="margin-top:10px;" data-t="closeBtn">إغلاق</button>
+  </div>
+</div>
+
+<div id="ownerModal" class="modal">
+  <div class="modal-content">
+    <button class="close-x" data-close="ownerModal">&times;</button>
+    <h3 data-t="ownerTitle">🔐 إعدادات المالك</h3>
+    <input id="newOwnerName" data-t-placeholder="newOwnerName" placeholder="الاسم الجديد" />
+    <input id="newOwnerPass" type="password" placeholder="••••" />
+    <button id="saveOwnerBtn" class="btn-primary" style="margin-bottom:10px;" data-t="saveBtn">💾 حفظ</button>
+    <button class="btn-secondary" data-close="ownerModal" data-t="cancelBtn">❌ إلغاء</button>
+  </div>
+</div>
+
+<div id="orderDetailModal" class="modal">
+  <div class="modal-content" style="max-width:700px;">
+    <button class="close-x" data-close="orderDetailModal">&times;</button>
+    <div id="orderDetailContent"></div>
+  </div>
+</div>
+
+<div id="wholesaleCodeModal" class="modal">
+  <div class="modal-content">
+    <button class="close-x" data-close="wholesaleCodeModal">&times;</button>
+    <h3 style="color:var(--vip);" data-t="wholesaleTitle">🔑 الرقم السري للجملة</h3>
+    <input id="wholesaleCodeInput" dir="ltr" />
+    <button id="saveWholesaleCodeBtn" class="btn-primary" style="background:linear-gradient(135deg,var(--vip),#9b59b6);" data-t="saveBtn">💾 حفظ</button>
+    <button class="btn-danger" data-close="wholesaleCodeModal" style="margin-top:8px;" data-t="cancelBtn">❌ إلغاء</button>
+  </div>
+</div>
+
+<div id="printOptionModal" class="modal">
+  <div class="modal-content" style="max-width:400px;text-align:center;">
+    <h3 data-t="printTitle">🖨️ اختر طريقة الطباعة</h3>
+    <button id="thermalPrintBtn" style="background:#1e293b;color:#fff;padding:12px;border-radius:40px;width:100%;margin-bottom:10px;border:none;font-weight:700;cursor:pointer;font-family:var(--font);"><i class="fas fa-bluetooth"></i> <span data-t="thermalPrint">طباعة حرارية</span></button>
+    <button id="normalPrintBtn" style="background:var(--primary);color:#fff;padding:12px;border-radius:40px;width:100%;border:none;font-weight:700;cursor:pointer;font-family:var(--font);"><i class="fas fa-print"></i> <span data-t="normalPrint">طباعة عادية</span></button>
+    <button data-close="printOptionModal" style="background:none;border:none;color:var(--text-muted);margin-top:16px;cursor:pointer;font-size:.9rem;font-family:var(--font);" data-t="cancelBtn">إلغاء</button>
+  </div>
+</div>
+
+<div class="icon-picker" id="iconPicker">
+  <div class="icon-picker-content">
+    <button id="iconPickerClose" style="position:absolute;top:14px;left:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-muted);">&times;</button>
+    <h3><i class="fas fa-icons"></i> <span data-t="chooseIcon">اختر أيقونة</span></h3>
+    <div class="cats" id="iconCats"></div>
+    <div class="icons-grid" id="iconGrid"></div>
+    <button type="button" class="upload-custom" id="uploadCustomIcon"><i class="fas fa-upload"></i> <span data-t="uploadCustomIcon">رفع أيقونة مخصصة</span></button>
+    <input type="file" id="customIconFile" accept="image/*" style="display:none;" />
+  </div>
+</div>
+
+<div class="toast" id="toastMessage"></div>
+<footer><p><span id="footerStoreName"></span> &copy; <span id="footerYear"></span></p></footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<!-- ═══════════════ 🌐 نظام الترجمة (بدون تغيير الاتجاه) ═══════════════ -->
+<script>
+const I18N = {
+  ar: {
+    loading: "جاري التحميل...",
+    searchPlaceholder: "🔍 بحث...",
+    all: "الكل",
+    clear: "إلغاء",
+    discountsMgmt: "إدارة التخفيضات",
+    landingTitle: "🚀 صفحات الترويج المستقلة",
+    landingDesc: "تظهر هنا المنتجات المُفعَّلة فقط. لتفعيل منتج، اذهب إلى 📦 المنتجات واضغط على زر 🚀.",
+    tProducts: "📦 المنتجات",
+    tLanding: "🚀 صفحات الترويج",
+    tDiscounts: "🏷️ التخفيضات",
+    tHidden: "🔒 المخفية",
+    tReviews: "💬 التقييمات",
+    tWhatsapp: "💚 الطلبات",
+    tConfirmed: "✅ المؤكدة",
+    mCover: "تغيير الغلاف",
+    mSetup: "معالج الإعداد (setup)",
+    mStoreSettings: "إعدادات المتجر",
+    mShippingZones: "مناطق الشحن",
+    mLandingSettings: "إعدادات صفحات الترويج",
+    mPixels: "إعدادات البكسل (FB + TikTok)",
+    mPolicies: "سياسات المتجر",
+    mUsers: "إدارة المستخدمين",
+    mOwnerSettings: "إعدادات المالك",
+    mWholesaleCode: "الرقم السري للجملة",
+    mExcelImport: "استيراد من إكسل",
+    mDeleteAll: "حذف كل المنتجات",
+    mLogout: "تسجيل الخروج",
+    loginTitle: "تسجيل الدخول",
+    loginUser: "اسم المستخدم",
+    loginPass: "كلمة المرور",
+    loginBtn: "دخول",
+    storeSettingsTitle: "إعدادات المتجر",
+    storeName: "اسم المتجر",
+    storeAddress: "عنوان المتجر",
+    storePhone: "رقم الهاتف (يظهر للعملاء للاتصال)",
+    storeWhatsapp: "رقم واتساب (لاستقبال الطلبات — يمكنك إدخال: رقم الهاتف)",
+    imgbbKey: "مفتاح ImgBB (لرفع الصور)",
+    currency: "العملة",
+    storeLogoLabel: "شعار المتجر",
+    storeLogoHelp: "ارفع شعاراً من هاتفك. سيظهر في كل الصفحات (المتجر، الفواتير، صفحات الترويج).",
+    noLogo: "لا يوجد شعار",
+    fromGallery: "من المعرض",
+    camera: "كاميرا",
+    enableWhatsapp: "تفعيل الطلبات عبر واتساب",
+    enableLocation: "تفعيل زر GPS",
+    landingSettingsTitle: "إعدادات صفحات الترويج",
+    announcementBar: "نص الشريط الإعلاني العلوي",
+    enablePixel: "تفعيل Facebook Pixel",
+    showReviews: "إظهار التقييمات",
+    showVisitors: "إظهار عداد الزوار",
+    pixelsTitle: "إعدادات البكسل",
+    pixelsGlobalHelp: "الـ Pixel عام لكل صفحات الترويج. لإضافة Pixel خاص بمنتج معيّن، اذهب إلى \"تعديل صفحة الترويج\".",
+    enableFacebookPixel: "تفعيل Facebook Pixel",
+    enableTiktokPixel: "تفعيل TikTok Pixel",
+    savePixelsBtn: "💾 حفظ الإعدادات",
+    productPixelSection: "بكسل خاص بهذا المنتج (اختياري)",
+    productPixelHelp: "إذا تركتها فارغة، سيتم استخدام البكسل العام.",
+    policiesTitle: "سياسات المتجر",
+    policiesHelp: "💡 أضف سياسات المتجر. كل سياسة تحتوي على عنوان + نص الشرح.",
+    addPolicyBtn: "إضافة سياسة جديدة",
+    savePoliciesBtn: "💾 حفظ السياسات",
+    shippingZonesTitle: "مناطق الشحن",
+    addZoneBtn: "➕ إضافة منطقة",
+    zoneTitle: "منطقة شحن",
+    zoneName: "اسم المنطقة",
+    zoneHomePrice: "سعر للمنزل (دج)",
+    zoneDeskPrice: "سعر للمكتب (دج)",
+    zoneWilayas: "الولايات",
+    selectAll: "تحديد الكل",
+    clearAll: "إلغاء الكل",
+    landingEditTitle: "تعديل صفحة الترويج",
+    originalProduct: "المنتج الأصلي:",
+    enableLanding: "تفعيل صفحة الترويج",
+    landingLogo: "شعار الصفحة",
+    landingLogoHelp: "ارفع شعاراً خاصاً لصفحة الترويج. إذا لم تُضف → شعار المتجر الأساسي يُستخدم.",
+    visibleTexts: "النصوص الظاهرة",
+    pageNameLabel: "اسم الصفحة (يظهر بجانب الشعار)",
+    productNameLabel: "اسم المنتج",
+    productNamePlaceholder: "اتركه فارغاً لاستخدام اسم المنتج الأصلي",
+    landingPriceLabel: "سعر خاص لصفحة الترويج",
+    landingPricePlaceholder: "اتركه فارغاً لاستخدام السعر الأصلي",
+    landingPriceHint: "💡 هذا السعر منفصل تماماً. سيظهر فقط في صفحة الترويج.",
+    announcementItemLabel: "نص الشريط الإعلاني (اختياري)",
+    optionalPlaceholder: "اتركه فارغاً للعام",
+    descriptionLabel: "وصف المنتج",
+    landingImages: "صور صفحة الترويج",
+    landingImagesHelp: "ارفع صوراً متعددة. إذا لم تُضف → الصورة الأساسية تُستخدم.",
+    noImagesYet: "لا توجد صور بعد",
+    featuresTitle: "لماذا تختارنا؟ (المميزات)",
+    featuresHelp: "كل ميزة: أيقونة + عبارة صغيرة",
+    addFeatureBtn: "إضافة ميزة",
+    optionalWord: "اختياري",
+    pageUrl: "رابط الصفحة",
+    copyBtn: "📋 نسخ",
+    openBtn: "🔗 فتح",
+    productNameField: "اسم المنتج",
+    priceField: "سعر البيع (دج)",
+    wholesaleField: "سعر الجملة (اختياري)",
+    qtyPerBoxField: "الكمية في العلبة (اختياري)",
+    chooseFamily: "-- اختر عائلة --",
+    addBtn: "إضافة",
+    newFamilyPlaceholder: "اسم العائلة الجديدة",
+    discountTitle: "🏷️ إدارة التخفيض",
+    productLabel: "المنتج:",
+    newPriceLabel: "السعر بعد التخفيض",
+    unlimitedDiscount: "تخفيض دائم",
+    durationLabel: "المدة",
+    fromLabel: "من",
+    toLabel: "إلى",
+    usersTitle: "👥 إدارة المستخدمين",
+    newUserName: "اسم المستخدم",
+    newUserPass: "كلمة المرور",
+    isAdmin: "مدير (Admin)",
+    addUserBtn: "➕ إضافة",
+    ownerTitle: "🔐 إعدادات المالك",
+    newOwnerName: "الاسم الجديد",
+    wholesaleTitle: "🔑 الرقم السري للجملة",
+    printTitle: "🖨️ اختر طريقة الطباعة",
+    thermalPrint: "طباعة حرارية",
+    normalPrint: "طباعة عادية",
+    saveBtn: "💾 حفظ",
+    cancelBtn: "❌ إلغاء",
+    closeBtn: "إغلاق",
+    removeBtn: "🗑️ إزالة",
+    deleteBtn: "🗑️ حذف",
+    editBtn: "✏️ تعديل",
+    chooseIcon: "اختر أيقونة",
+    uploadCustomIcon: "رفع أيقونة مخصصة",
+    editFamilyPrompt: "تعديل اسم العائلة",
+    familyExists: "⚠️ موجودة",
+    familyEdited: "✅ تم التعديل",
+    confirmDeleteFamily: "⚠️ حذف عائلة",
+    noProductsMsg: "لا توجد منتجات",
+    deleteProductConfirm: "حذف المنتج نهائياً؟",
+    visibilityShown: "✅ تم الإظهار",
+    visibilityHidden: "✅ تم الإخفاء",
+    processing: "⏳ جاري المعالجة...",
+    saved: "✅ تم الحفظ",
+    saveFailed: "❌ فشل الحفظ",
+    fillImgbb: "⚠️ مفتاح ImgBB غير مُعد",
+    uploadingLogo: "⏳ جاري رفع الشعار...",
+    logoUploaded: "✅ تم رفع الشعار",
+    confirmDeleteLogo: "حذف الشعار الخاص بهذه الصفحة؟\n(سيتم استخدام شعار المتجر الأساسي)",
+    logoRemoved: "✅ تم إزالة الشعار",
+    noLogoMsg: "⚠️ لا يوجد شعار",
+    confirmDeleteStoreLogo: "حذف شعار المتجر؟",
+    logoStoreUploaded: "✅ تم رفع الشعار — لا تنسى الحفظ",
+    logoStoreRemoved: "✅ تم إزالة الشعار — لا تنسى الحفظ",
+    storeNameRequired: "⚠️ اسم المتجر مطلوب",
+    storeSavedWithPhone: "✅ تم الحفظ — الرقم: ",
+    noDiscounts: "لا توجد تخفيضات",
+    confirmRemoveDiscount: "إزالة؟",
+    discountRemoveNotAllowed: "غير مسموح",
+    wrongPrice: "⚠️ سعر خطأ",
+    priceMustBeLess: "⚠️ يجب أقل",
+    setDuration: "⚠️ حدد المدة",
+    wrongTime: "⚠️ وقت خطأ",
+    noHiddenProducts: "لا توجد منتجات مخفية",
+    noLandingPages: "لا توجد صفحات ترويج بعد",
+    goToProductsActivate: "اذهب إلى 📦 المنتجات واضغط 🚀 بجانب أي منتج.",
+    landingActive: "نشطة",
+    linkCopied: "✅ تم نسخ الرابط",
+    notAllowed: "غير مسموح",
+    notAllowedOwner: "غير مسموح — خاص بالمالك",
+    noImage: "لا توجد صور بعد",
+    uploadingNImages: "⏳ جاري رفع ",
+    imagesUploaded: "✅ تم رفع ",
+    uploadFailed: "❌ فشل الرفع",
+    noFeaturesYet: "لا توجد مميزات بعد",
+    featurePlaceholder: "مثال: توصيل سريع",
+    noPoliciesYet: "لا توجد سياسات بعد.",
+    noPoliciesHint: "اضغط \"إضافة سياسة جديدة\" للبدء.",
+    policyTitlePlaceholder: "عنوان السياسة",
+    policyContentPlaceholder: "اكتب نص السياسة هنا...",
+    confirmDeletePolicy: "حذف هذه السياسة؟",
+    noZones: "لا توجد مناطق",
+    zoneNameRequired: "⚠️",
+    wilayaRequired: "⚠️",
+    confirmDeleteZone: "⚠️ حذف؟",
+    noOrders: "💬 لا توجد طلبات",
+    noConfirmedOrders: "✅ لا توجد طلبات مؤكدة",
+    newOrderBadge: "جديد",
+    promotionBadge: "ترويج",
+    confirmedBadge: "مؤكد",
+    promotionSourceBadge: "من صفحة ترويج",
+    orderIncoming: "طلب وارد",
+    orderConfirmed: "طلب مؤكد",
+    actionConfirmPrint: "تأكيد وطباعة",
+    actionPrint: "طباعة",
+    actionDelete: "حذف",
+    confirmDelete: "حذف؟",
+    confirmDeleteAll: "⚠️ حذف الكل؟",
+    orderConfirmedMsg: "✅ تم تأكيد الطلب",
+    customerLabel: "العميل:",
+    phoneLabel: "الهاتف:",
+    addressLabel: "العنوان:",
+    shippingLabel: "🚚 الشحن:",
+    totalLabel: "الإجمالي:",
+    deleteReviewConfirm: "⚠️ هل أنت متأكد من حذف هذا التعليق نهائياً؟",
+    reviewDeleted: "✅ تم حذف التعليق",
+    reviewDeleteFailed: "❌ فشل الحذف",
+    noReviewsYet: "لا توجد تقييمات بعد",
+    noReviewsDesc: "عندما يكتب الزبائن تقييماتهم، ستظهر هنا تلقائياً.",
+    ownerLabel: "مالك",
+    adminLabel: "مدير",
+    sellerLabel: "بائع",
+    cannotDeleteOwner: "لا يمكن الحذف",
+    noUsers: "لا يوجد",
+    confirmDeleteUser: "حذف",
+    userAdded: "✅ تمت الإضافة",
+    userAddFailed: "❌ فشل: ",
+    userShortName: "⚠️ اسم المستخدم قصير",
+    fillFields: "⚠️",
+    enterLoginData: "أدخل البيانات",
+    wrongLoginData: "بيانات الدخول غير صحيحة",
+    welcomeUser: "أهلاً",
+    addProductTitle: "إضافة منتج",
+    editProductTitle: "✏️ تعديل المنتج",
+    discountActive: "دائم",
+    discountTemp: "تخفيض",
+    hiddenLocked: "🔒",
+    unknownFamily: "غير مصنف",
+    deletedProduct: "منتج محذوف",
+    discountBadge: "تخفيض",
+    wholesaleBadgeLabel: "جملة",
+    promotedBadge: "مُروَّج",
+    langBtnLabel: "FR"
+  },
+  fr: {
+    loading: "Chargement...",
+    searchPlaceholder: "🔍 Rechercher...",
+    all: "Tout",
+    clear: "Annuler",
+    discountsMgmt: "Gestion des promotions",
+    landingTitle: "🚀 Pages promotionnelles",
+    landingDesc: "Seuls les produits activés apparaissent ici. Pour activer un produit, allez dans 📦 Produits et cliquez sur 🚀.",
+    tProducts: "📦 Produits",
+    tLanding: "🚀 Pages promo",
+    tDiscounts: "🏷️ Promotions",
+    tHidden: "🔒 Masqués",
+    tReviews: "💬 Avis",
+    tWhatsapp: "💚 Commandes",
+    tConfirmed: "✅ Confirmées",
+    mCover: "Changer la couverture",
+    mSetup: "Assistant de configuration",
+    mStoreSettings: "Paramètres boutique",
+    mShippingZones: "Zones de livraison",
+    mLandingSettings: "Paramètres pages promo",
+    mPixels: "Paramètres Pixel (FB + TikTok)",
+    mPolicies: "Politiques boutique",
+    mUsers: "Gestion utilisateurs",
+    mOwnerSettings: "Paramètres propriétaire",
+    mWholesaleCode: "Code prix de gros",
+    mExcelImport: "Importer depuis Excel",
+    mDeleteAll: "Supprimer tous les produits",
+    mLogout: "Déconnexion",
+    loginTitle: "Connexion",
+    loginUser: "Nom d'utilisateur",
+    loginPass: "Mot de passe",
+    loginBtn: "Se connecter",
+    storeSettingsTitle: "Paramètres boutique",
+    storeName: "Nom de la boutique",
+    storeAddress: "Adresse de la boutique",
+    storePhone: "Téléphone (visible par les clients)",
+    storeWhatsapp: "Numéro WhatsApp (réception des commandes)",
+    imgbbKey: "Clé ImgBB (pour images)",
+    currency: "Devise",
+    storeLogoLabel: "Logo boutique",
+    storeLogoHelp: "Téléchargez un logo depuis votre téléphone. Il apparaîtra dans toutes les pages.",
+    noLogo: "Aucun logo",
+    fromGallery: "Galerie",
+    camera: "Caméra",
+    enableWhatsapp: "Activer les commandes WhatsApp",
+    enableLocation: "Activer bouton GPS",
+    landingSettingsTitle: "Paramètres pages promo",
+    announcementBar: "Texte de la barre d'annonce",
+    enablePixel: "Activer Facebook Pixel",
+    showReviews: "Afficher les avis",
+    showVisitors: "Afficher compteur de visiteurs",
+    pixelsTitle: "Paramètres Pixel",
+    pixelsGlobalHelp: "Le Pixel est global pour toutes les pages promo. Pour un Pixel spécifique à un produit, allez dans \"Modifier la page promo\".",
+    enableFacebookPixel: "Activer Facebook Pixel",
+    enableTiktokPixel: "Activer TikTok Pixel",
+    savePixelsBtn: "💾 Enregistrer",
+    productPixelSection: "Pixel spécifique à ce produit (optionnel)",
+    productPixelHelp: "Si vide, le Pixel global sera utilisé.",
+    policiesTitle: "Politiques boutique",
+    policiesHelp: "💡 Ajoutez les politiques. Chaque politique = titre + description.",
+    addPolicyBtn: "Ajouter une politique",
+    savePoliciesBtn: "💾 Sauvegarder",
+    shippingZonesTitle: "Zones de livraison",
+    addZoneBtn: "➕ Ajouter une zone",
+    zoneTitle: "Zone de livraison",
+    zoneName: "Nom de la zone",
+    zoneHomePrice: "Prix domicile (DA)",
+    zoneDeskPrice: "Prix bureau (DA)",
+    zoneWilayas: "Wilayas",
+    selectAll: "Tout sélectionner",
+    clearAll: "Tout désélectionner",
+    landingEditTitle: "Modifier la page promo",
+    originalProduct: "Produit original :",
+    enableLanding: "Activer la page promo",
+    landingLogo: "Logo de la page",
+    landingLogoHelp: "Téléchargez un logo spécifique. Sinon, celui de la boutique sera utilisé.",
+    visibleTexts: "Textes visibles",
+    pageNameLabel: "Nom de la page (apparaît à côté du logo)",
+    productNameLabel: "Nom du produit",
+    productNamePlaceholder: "Laisser vide pour utiliser le nom original",
+    landingPriceLabel: "Prix spécial page promo",
+    landingPricePlaceholder: "Laisser vide pour prix original",
+    landingPriceHint: "💡 Ce prix est totalement séparé. Apparaît uniquement sur la page promo.",
+    announcementItemLabel: "Texte barre d'annonce (optionnel)",
+    optionalPlaceholder: "Laisser vide pour général",
+    descriptionLabel: "Description du produit",
+    landingImages: "Images de la page promo",
+    landingImagesHelp: "Téléchargez plusieurs images. Sinon, l'image principale sera utilisée.",
+    noImagesYet: "Aucune image",
+    featuresTitle: "Pourquoi nous choisir ? (Points forts)",
+    featuresHelp: "Chaque point : icône + phrase",
+    addFeatureBtn: "Ajouter un point",
+    optionalWord: "optionnel",
+    pageUrl: "Lien de la page",
+    copyBtn: "📋 Copier",
+    openBtn: "🔗 Ouvrir",
+    productNameField: "Nom du produit",
+    priceField: "Prix de vente (DA)",
+    wholesaleField: "Prix de gros (optionnel)",
+    qtyPerBoxField: "Quantité par boîte (optionnel)",
+    chooseFamily: "-- Choisir une famille --",
+    addBtn: "Ajouter",
+    newFamilyPlaceholder: "Nom de la nouvelle famille",
+    discountTitle: "🏷️ Gestion de la promotion",
+    productLabel: "Produit :",
+    newPriceLabel: "Prix après réduction",
+    unlimitedDiscount: "Promotion permanente",
+    durationLabel: "Durée",
+    fromLabel: "De",
+    toLabel: "À",
+    usersTitle: "👥 Gestion des utilisateurs",
+    newUserName: "Nom d'utilisateur",
+    newUserPass: "Mot de passe",
+    isAdmin: "Administrateur",
+    addUserBtn: "➕ Ajouter",
+    ownerTitle: "🔐 Paramètres propriétaire",
+    newOwnerName: "Nouveau nom",
+    wholesaleTitle: "🔑 Code prix de gros",
+    printTitle: "🖨️ Choisir l'impression",
+    thermalPrint: "Impression thermique",
+    normalPrint: "Impression normale",
+    saveBtn: "💾 Enregistrer",
+    cancelBtn: "❌ Annuler",
+    closeBtn: "Fermer",
+    removeBtn: "🗑️ Retirer",
+    deleteBtn: "🗑️ Supprimer",
+    editBtn: "✏️ Modifier",
+    chooseIcon: "Choisir une icône",
+    uploadCustomIcon: "Télécharger une icône",
+    editFamilyPrompt: "Modifier le nom de la famille",
+    familyExists: "⚠️ Existe déjà",
+    familyEdited: "✅ Modifié",
+    confirmDeleteFamily: "⚠️ Supprimer la famille",
+    noProductsMsg: "Aucun produit",
+    deleteProductConfirm: "Supprimer définitivement ?",
+    visibilityShown: "✅ Affiché",
+    visibilityHidden: "✅ Masqué",
+    processing: "⏳ Traitement...",
+    saved: "✅ Enregistré",
+    saveFailed: "❌ Échec de l'enregistrement",
+    fillImgbb: "⚠️ Clé ImgBB non définie",
+    uploadingLogo: "⏳ Téléchargement du logo...",
+    logoUploaded: "✅ Logo téléchargé",
+    confirmDeleteLogo: "Supprimer le logo de cette page ?\n(Le logo de la boutique sera utilisé)",
+    logoRemoved: "✅ Logo supprimé",
+    noLogoMsg: "⚠️ Aucun logo",
+    confirmDeleteStoreLogo: "Supprimer le logo de la boutique ?",
+    logoStoreUploaded: "✅ Logo téléchargé — n'oubliez pas d'enregistrer",
+    logoStoreRemoved: "✅ Logo supprimé — n'oubliez pas d'enregistrer",
+    storeNameRequired: "⚠️ Nom de la boutique requis",
+    storeSavedWithPhone: "✅ Enregistré — Numéro : ",
+    noDiscounts: "Aucune promotion",
+    confirmRemoveDiscount: "Retirer ?",
+    discountRemoveNotAllowed: "Non autorisé",
+    wrongPrice: "⚠️ Prix invalide",
+    priceMustBeLess: "⚠️ Doit être inférieur",
+    setDuration: "⚠️ Définir la durée",
+    wrongTime: "⚠️ Heure invalide",
+    noHiddenProducts: "Aucun produit masqué",
+    noLandingPages: "Aucune page promo",
+    goToProductsActivate: "Allez dans 📦 Produits et cliquez sur 🚀.",
+    landingActive: "Active",
+    linkCopied: "✅ Lien copié",
+    notAllowed: "Non autorisé",
+    notAllowedOwner: "Non autorisé — propriétaire uniquement",
+    noImage: "Aucune image",
+    uploadingNImages: "⏳ Téléchargement de ",
+    imagesUploaded: "✅ Téléchargées ",
+    uploadFailed: "❌ Échec du téléchargement",
+    noFeaturesYet: "Aucun point fort",
+    featurePlaceholder: "Ex : Livraison rapide",
+    noPoliciesYet: "Aucune politique.",
+    noPoliciesHint: "Cliquez sur \"Ajouter\" pour commencer.",
+    policyTitlePlaceholder: "Titre de la politique",
+    policyContentPlaceholder: "Écrivez la politique ici...",
+    confirmDeletePolicy: "Supprimer cette politique ?",
+    noZones: "Aucune zone",
+    zoneNameRequired: "⚠️",
+    wilayaRequired: "⚠️",
+    confirmDeleteZone: "⚠️ Supprimer ?",
+    noOrders: "💬 Aucune commande",
+    noConfirmedOrders: "✅ Aucune commande confirmée",
+    newOrderBadge: "Nouveau",
+    promotionBadge: "Promo",
+    confirmedBadge: "Confirmée",
+    promotionSourceBadge: "Page promo",
+    orderIncoming: "Commande reçue",
+    orderConfirmed: "Commande confirmée",
+    actionConfirmPrint: "Confirmer & imprimer",
+    actionPrint: "Imprimer",
+    actionDelete: "Supprimer",
+    confirmDelete: "Supprimer ?",
+    confirmDeleteAll: "⚠️ Tout supprimer ?",
+    orderConfirmedMsg: "✅ Commande confirmée",
+    customerLabel: "Client :",
+    phoneLabel: "Téléphone :",
+    addressLabel: "Adresse :",
+    shippingLabel: "🚚 Livraison :",
+    totalLabel: "Total :",
+    deleteReviewConfirm: "⚠️ Confirmer la suppression ?",
+    reviewDeleted: "✅ Avis supprimé",
+    reviewDeleteFailed: "❌ Échec",
+    noReviewsYet: "Aucun avis",
+    noReviewsDesc: "Les avis apparaîtront ici automatiquement.",
+    ownerLabel: "propriétaire",
+    adminLabel: "admin",
+    sellerLabel: "vendeur",
+    cannotDeleteOwner: "Ne peut pas être supprimé",
+    noUsers: "Aucun",
+    confirmDeleteUser: "Supprimer",
+    userAdded: "✅ Ajouté",
+    userAddFailed: "❌ Échec : ",
+    userShortName: "⚠️ Nom trop court",
+    fillFields: "⚠️",
+    enterLoginData: "Entrez les identifiants",
+    wrongLoginData: "Identifiants incorrects",
+    welcomeUser: "Bienvenue",
+    addProductTitle: "Ajouter un produit",
+    editProductTitle: "✏️ Modifier le produit",
+    discountActive: "Permanent",
+    discountTemp: "Promo",
+    hiddenLocked: "🔒",
+    unknownFamily: "Non classé",
+    deletedProduct: "Produit supprimé",
+    discountBadge: "Promo",
+    wholesaleBadgeLabel: "Gros",
+    promotedBadge: "Promu",
+    langBtnLabel: "AR"
+  }
+};
+
+let LANG = localStorage.getItem('store_lang') || 'ar';
+window.currentLang = LANG;
+
+function t(key) {
+  return (I18N[LANG] && I18N[LANG][key]) || (I18N.ar && I18N.ar[key]) || key;
+}
+window.t = t;
+
+function applyTranslations() {
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    const val = I18N[LANG][key];
+    if (val) el.textContent = val;
+  });
+  document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-t-placeholder');
+    const val = I18N[LANG][key];
+    if (val) el.placeholder = val;
+  });
+  const lb = document.getElementById('langBtnLabel');
+  if (lb) lb.textContent = t('langBtnLabel');
+}
+window.applyTranslations = applyTranslations;
+
+function toggleLang() {
+  LANG = LANG === 'ar' ? 'fr' : 'ar';
+  localStorage.setItem('store_lang', LANG);
+  location.reload();
+}
+window.toggleLang = toggleLang;
+
+applyTranslations();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getDatabase, ref, onValue, set, remove, update, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+const $ = id => document.getElementById(id);
+const BOOT = window.STORE_BOOTSTRAP;
+function showNotice(icon, title, msg) {
+  $("loadingScreen").style.display = "none";
+  const n = $("noticeScreen");
+  n.style.display = "flex";
+  n.innerHTML = `<div class="ico">${icon}</div><h2>${title}</h2><p>${msg}</p>`;
+}
+if (!BOOT) { showNotice("⚠️","الإعدادات مفقودة","config.js غير موجود."); throw new Error("no config"); }
+const fc = BOOT.firebaseConfig || {};
+if (!fc.apiKey || String(fc.apiKey).includes("YOUR_")) {
+  showNotice("🔑","الإعدادات غير مكتملة","افتح setup.html أولاً."); throw new Error("not set");
+}
+
+const app = initializeApp(fc);
+const db = getDatabase(app);
+const auth = getAuth(app);
+signInAnonymously(auth).catch(() => {});
+
+const productsRef = ref(db, "products");
+const ordersRef = ref(db, "whatsappOrders");
+const confirmedRef = ref(db, "confirmedOrders");
+const invoiceCounterRef = ref(db, "settings/invoiceCounter");
+const familiesRef = ref(db, "families");
+const discountsRef = ref(db, "discounts");
+const reviewsRef = ref(db, "reviews");
+
+let storeInfo = { name:"", logoUrl:"", phoneInvoice:"", address:"", whatsappNumber:"", enableWhatsapp:true, enableLocation:true, currency:"دج" };
+let imgbbKey = BOOT.imgbbApiKey || "";
+let wholesaleCode = null;
+let allProducts = {};
+let allDiscounts = {};
+let allReviews = {};
+let filtered = {};
+let currentPage = 1;
+const PER_PAGE = 20;
+let familiesList = [];
+let currentFamilyFilter = "الكل";
+let lastSeenCount = parseInt(localStorage.getItem('lastSeenOrderCount')) || 0;
+let currentOrderCount = 0;
+let newOrdersCount = 0;
+let isWhatsappTabOpen = false;
+let printContext = { key:null, order:null, type:null };
+let booted = false;
+let landingGlobal = { announcement:"", enablePixel:false, pixelId:"", enableTiktokPixel:false, tiktokPixelId:"", enableReviews:true, enableVisitors:true, policies:[] };
+let shippingZones = [];
+let currentLandingImages = [];
+let currentLandingLogo = "";
+let currentFeatures = [];
+let currentPolicies = [];
+let iconPickerTarget = null;
+let currentStoreLogo = "";
+
+const escapeHtml = s => !s ? '' : String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const fmt = n => Number(n || 0).toLocaleString('fr-FR');
+
+function curLbl() {
+  const c = storeInfo.currency || 'دج';
+  const lng = window.currentLang || 'ar';
+  if (lng === 'fr' && (c === 'دج' || c === 'DZD' || c === 'دينار')) return 'DA';
+  return c;
+}
+
+function normalizeWhatsappNumber(raw) {
+  if (!raw) return "";
+  let num = String(raw).replace(/[^0-9]/g, "");
+  if (!num) return "";
+  num = num.replace(/^0+/, "");
+  if (num.startsWith("00213")) num = num.substring(2);
+  if (!num.startsWith("213")) num = "213" + num;
+  return num;
+}
+
+const FA_ICONS = {
+  "التوصيل":[{"i":"fa-truck","n":"شاحنة"},{"i":"fa-shipping-fast","n":"توصيل سريع"},{"i":"fa-box","n":"صندوق"},{"i":"fa-boxes","n":"صناديق"},{"i":"fa-home","n":"منزل"},{"i":"fa-building","n":"مبنى"},{"i":"fa-map-marker-alt","n":"موقع"},{"i":"fa-rocket","n":"صاروخ"},{"i":"fa-plane","n":"طائرة"},{"i":"fa-clock","n":"ساعة"},{"i":"fa-stopwatch","n":"ساعة توقف"},{"i":"fa-hourglass-half","n":"رمل"},{"i":"fa-route","n":"مسار"},{"i":"fa-dolly","n":"عربة"},{"i":"fa-pallet","n":"منصة"},{"i":"fa-warehouse","n":"مخزن"}],
+  "الدفع":[{"i":"fa-money-bill","n":"ورقة"},{"i":"fa-money-bill-wave","n":"أموال"},{"i":"fa-money-check","n":"شيك"},{"i":"fa-credit-card","n":"بطاقة"},{"i":"fa-wallet","n":"محفظة"},{"i":"fa-hand-holding-usd","n":"دفع باليد"},{"i":"fa-coins","n":"عملات"},{"i":"fa-receipt","n":"إيصال"},{"i":"fa-cash-register","n":"صندوق"},{"i":"fa-file-invoice-dollar","n":"فاتورة"},{"i":"fa-piggy-bank","n":"حصالة"},{"i":"fa-percent","n":"نسبة"},{"i":"fa-tags","n":"تخفيض"},{"i":"fa-tag","n":"بطاقة"},{"i":"fa-gift","n":"هدية"},{"i":"fa-handshake","n":"مصافحة"}],
+  "الجودة":[{"i":"fa-star","n":"نجمة"},{"i":"fa-award","n":"جائزة"},{"i":"fa-medal","n":"ميدالية"},{"i":"fa-crown","n":"تاج"},{"i":"fa-gem","n":"جوهرة"},{"i":"fa-certificate","n":"شهادة"},{"i":"fa-check-circle","n":"صحيح"},{"i":"fa-check-double","n":"تحقق"},{"i":"fa-thumbs-up","n":"إعجاب"},{"i":"fa-fire","n":"نار"},{"i":"fa-bolt","n":"برق"},{"i":"fa-trophy","n":"كأس"},{"i":"fa-heart","n":"قلب"},{"i":"fa-diamond","n":"ألماس"},{"i":"fa-star-half-alt","n":"نصف نجمة"},{"i":"fa-spa","n":"عافية"}],
+  "الضمان":[{"i":"fa-shield-alt","n":"درع"},{"i":"fa-shield-halved","n":"درع نصفي"},{"i":"fa-shield-heart","n":"درع حماية"},{"i":"fa-lock","n":"قفل"},{"i":"fa-unlock","n":"فتح"},{"i":"fa-key","n":"مفتاح"},{"i":"fa-user-shield","n":"حماية"},{"i":"fa-file-contract","n":"عقد"},{"i":"fa-file-signature","n":"توقيع"},{"i":"fa-stamp","n":"ختم"},{"i":"fa-fingerprint","n":"بصمة"},{"i":"fa-balance-scale","n":"عدالة"},{"i":"fa-gavel","n":"مطرقة"},{"i":"fa-undo","n":"إرجاع"},{"i":"fa-redo","n":"إعادة"},{"i":"fa-check","n":"علامة"}],
+  "الخدمة":[{"i":"fa-headset","n":"سماعة"},{"i":"fa-phone","n":"هاتف"},{"i":"fa-phone-volume","n":"هاتف مرتفع"},{"i":"fa-comments","n":"تعليقات"},{"i":"fa-comment-dots","n":"محادثة"},{"i":"fa-envelope","n":"بريد"},{"i":"fa-users","n":"مستخدمون"},{"i":"fa-user-tie","n":"أعمال"},{"i":"fa-user-check","n":"موثق"},{"i":"fa-calendar-check","n":"موعد"},{"i":"fa-calendar-alt","n":"تقويم"},{"i":"fa-question-circle","n":"سؤال"},{"i":"fa-info-circle","n":"معلومة"},{"i":"fa-bell","n":"إشعار"},{"i":"fa-bullhorn","n":"إعلان"},{"i":"fa-life-ring","n":"دعم"}],
+  "متنوع":[{"i":"fa-sun","n":"شمس"},{"i":"fa-moon","n":"قمر"},{"i":"fa-flag","n":"علم"},{"i":"fa-bookmark","n":"علامة"},{"i":"fa-lightbulb","n":"فكرة"},{"i":"fa-compass","n":"بوصلة"},{"i":"fa-chart-line","n":"نمو"},{"i":"fa-chart-pie","n":"إحصائيات"},{"i":"fa-bullseye","n":"هدف"},{"i":"fa-magic","n":"سحر"},{"i":"fa-leaf","n":"ورقة"},{"i":"fa-seedling","n":"نمو"},{"i":"fa-glass-cheers","n":"احتفال"},{"i":"fa-umbrella","n":"مظلة"},{"i":"fa-tools","n":"أدوات"},{"i":"fa-wrench","n":"مفتاح ربط"}]
+};
+let currentIconCategory = Object.keys(FA_ICONS)[0];
+
+function showToast(msg) {
+  const t = $("toastMessage");
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove('show'), 2800);
+}
+function getRole() { return localStorage.getItem("role") || "seller"; }
+function isOwner() { return getRole() === "owner"; }
+function isAdminOrOwner() { const r = getRole(); return r === "owner" || r === "admin"; }
+function openModal(id) { $(id).classList.add('show'); }
+function closeModal(id) { $(id).classList.remove('show'); }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-close]');
+  if (t) closeModal(t.dataset.close);
+  if (e.target.classList && e.target.classList.contains('modal')) e.target.classList.remove('show');
+});
+
+function applyStoreInfo() {
+  const n = storeInfo.name || "متجري";
+  document.title = "لوحة الإدارة | " + n;
+  $("headerStoreName").textContent = n;
+  $("footerStoreName").textContent = n;
+  $("footerYear").textContent = new Date().getFullYear();
+  if (storeInfo.logoUrl) {
+    $("headerLogo").src = storeInfo.logoUrl; $("headerLogo").style.display = "inline-block";
+    $("loginLogo").src = storeInfo.logoUrl; $("loginLogo").style.display = "inline-block";
+  } else { $("headerLogo").style.display = "none"; $("loginLogo").style.display = "none"; }
+}
+
+/* ═══ Firebase Listeners ═══ */
+onValue(ref(db, 'store/info'), snap => {
+  const d = snap.val() || {};
+  storeInfo = { name: d.name || "", logoUrl: d.logoUrl || "", phoneInvoice: d.phoneInvoice || "", address: d.address || "", whatsappNumber: d.whatsappNumber || "", enableWhatsapp: d.enableWhatsapp !== false, enableLocation: d.enableLocation !== false, currency: d.currency || "دج" };
+  applyStoreInfo();
+  $("setStoreName").value = storeInfo.name;
+  $("setAddress").value = storeInfo.address;
+  $("setPhone").value = storeInfo.phoneInvoice;
+  $("setWhatsapp").value = storeInfo.whatsappNumber;
+  $("setCurrency").value = storeInfo.currency;
+  $("setEnableWhatsapp").checked = storeInfo.enableWhatsapp;
+  $("setEnableLocation").checked = storeInfo.enableLocation;
+  currentStoreLogo = storeInfo.logoUrl || "";
+  renderStoreLogo();
+  if (!booted) { booted = true; bootApp(); }
+});
+
+onValue(ref(db, 'store/settings'), snap => {
+  const d = snap.val() || {};
+  imgbbKey = d.imgbbApiKey || BOOT.imgbbApiKey || "";
+  $("setImgbb").value = imgbbKey;
+});
+
+onValue(ref(db, 'store/cover'), snap => {
+  const d = snap.val();
+  if (d && d.url) { $("coverBanner").style.display = "block"; $("coverImage").src = d.url; }
+  else $("coverBanner").style.display = "none";
+});
+
+onValue(ref(db, 'store/wholesaleCode'), snap => {
+  const d = snap.val();
+  wholesaleCode = d ? (d.code || null) : null;
+});
+
+onValue(ref(db, 'store/landing'), snap => {
+  const d = snap.val() || {};
+  landingGlobal = {
+    announcement: d.announcement || "",
+    enablePixel: d.enablePixel === true,
+    pixelId: d.pixelId || "",
+    enableTiktokPixel: d.enableTiktokPixel === true,
+    tiktokPixelId: d.tiktokPixelId || "",
+    enableReviews: d.enableReviews !== false,
+    enableVisitors: d.enableVisitors !== false,
+    policies: Array.isArray(d.policies) ? d.policies : []
+  };
+  $("landingAnnouncement").value = landingGlobal.announcement;
+  $("landingEnableReviews").checked = landingGlobal.enableReviews;
+  $("landingEnableVisitors").checked = landingGlobal.enableVisitors;
+  /* ✅ إعدادات البكسل */
+  $("pixelEnableFB").checked = landingGlobal.enablePixel;
+  $("pixelFBId").value = landingGlobal.pixelId;
+  $("pixelEnableTT").checked = landingGlobal.enableTiktokPixel;
+  $("pixelTTId").value = landingGlobal.tiktokPixelId;
+  currentPolicies = landingGlobal.policies.map(p => ({ title: p.title || '', content: p.content || '' }));
+  renderPoliciesList();
+});
+
+onValue(ref(db, 'store/shipping_zones'), snap => {
+  const d = snap.val();
+  shippingZones = d ? Object.entries(d).map(([id, z]) => ({ id, ...z })) : [];
+  renderZonesList();
+});
+
+/* ═══ REVIEWS ═══ */
+onValue(reviewsRef, snap => {
+  allReviews = snap.val() || {};
+  renderReviewsSection();
+  updateReviewsBadge();
+});
+
+function updateReviewsBadge() {
+  let total = 0;
+  Object.values(allReviews).forEach(productReviews => {
+    total += Object.keys(productReviews || {}).length;
+  });
+  const badge = $("reviewsBadge");
+  if (badge) {
+    if (total > 0) { badge.style.display = "inline-block"; badge.textContent = total; }
+    else badge.style.display = "none";
+  }
+}
+
+function renderReviewsSection() {
+  const c = $("reviewsListContainer"); if (!c) return;
+  c.innerHTML = '';
+  const productsWithReviews = Object.entries(allReviews).filter(([_, revs]) => revs && Object.keys(revs).length > 0);
+  if (!productsWithReviews.length) {
+    c.innerHTML = `
+      <div class="no-data" style="padding:50px 20px;">
+        <i class="fas fa-comments" style="color:#67e8f9;"></i>
+        <h3 style="color:#0891b2;font-weight:800;margin:8px 0;font-size:1rem;">${t('noReviewsYet')}</h3>
+        <p style="font-size:.85rem;color:#64748b;">${t('noReviewsDesc')}</p>
+      </div>`;
+    return;
+  }
+  productsWithReviews.sort((a, b) => {
+    const aTimes = Object.values(a[1]).map(r => r.timestamp || 0);
+    const bTimes = Object.values(b[1]).map(r => r.timestamp || 0);
+    return Math.max(...bTimes) - Math.max(...aTimes);
+  });
+  c.innerHTML = productsWithReviews.map(([productId, productReviews]) => {
+    const product = allProducts[productId];
+    const productName = product?.name || `${t('deletedProduct')} (${productId.substring(0,6)}...)`;
+    const productImg = product?.imageUrl || '';
+    const productFamily = product?.family || t('unknownFamily');
+    const reviewsArray = Object.entries(productReviews).map(([revKey, r]) => ({ key: revKey, ...r }));
+    reviewsArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const reviewsHtml = reviewsArray.map(r => {
+      const author = r.reviewerName || 'زبون';
+      const initial = author.trim().charAt(0).toUpperCase() || 'ز';
+      const rating = Number(r.rating || 0);
+      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      const date = r.timestamp ? new Date(r.timestamp).toLocaleString('ar-DZ') : '';
+      return `
+        <div class="review-row">
+          <div class="rv-body">
+            <div class="rv-head">
+              <div class="rv-author">
+                <span class="avatar">${escapeHtml(initial)}</span>
+                <span>${escapeHtml(author)}</span>
+              </div>
+              <div class="rv-stars">${stars}</div>
+            </div>
+            <div class="rv-text">${escapeHtml(r.comment || '')}</div>
+            ${date ? `<div class="rv-date"><i class="far fa-clock"></i> ${date}</div>` : ''}
+          </div>
+          <button class="rv-delete" data-del-review="${r.key}" data-del-product="${productId}" title="${t('actionDelete')}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `;
+    }).join('');
+    return `
+      <div class="reviews-product-card">
+        <div class="reviews-product-header">
+          ${productImg ? `<img src="${escapeHtml(productImg)}" onerror="this.style.display='none'">` : `<div style="width:54px;height:54px;border-radius:12px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;flex-shrink:0;"><i class="fas fa-box"></i></div>`}
+          <div class="rp-info">
+            <h4>${escapeHtml(productName)}</h4>
+            <div class="rp-meta">
+              <span><i class="fas fa-tag"></i> ${escapeHtml(productFamily)}</span>
+            </div>
+          </div>
+          <div class="rp-count">
+            <i class="fas fa-comment"></i> ${reviewsArray.length}
+          </div>
+        </div>
+        <div class="review-list">
+          ${reviewsHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+  c.querySelectorAll('[data-del-review]').forEach(b => b.addEventListener('click', () => {
+    deleteReview(b.dataset.delProduct, b.dataset.delReview);
+  }));
+}
+
+async function deleteReview(productId, reviewKey) {
+  if (!confirm(t('deleteReviewConfirm'))) return;
+  try {
+    await remove(ref(db, `reviews/${productId}/${reviewKey}`));
+    showToast(t('reviewDeleted'));
+    const snap = await get(ref(db, `reviews/${productId}`));
+    if (!snap.exists() || !snap.val() || Object.keys(snap.val()).length === 0) {
+      await remove(ref(db, `reviews/${productId}`));
+    }
+  } catch (e) {
+    console.error(e);
+    showToast(t('reviewDeleteFailed'));
+  }
+}
+
+/* ═══ Permissions ═══ */
+function updateMenuPermissions() {
+  const r = getRole(); const o = r === "owner"; const a = r === "admin";
+  const perms = {
+    btnStoreSettings: o,
+    btnShippingZones: o || a,
+    btnLandingSettings: o,
+    btnPixels: o,
+    btnPolicies: o || a,
+    btnUsers: o,
+    btnOwnerSettings: o,
+    btnWholesaleCode: o,
+    btnDeleteAllProducts: o,
+    btnExcelImport: o || a,
+    btnCover: o || a,
+    btnSetup: o
+  };
+  for (const [id, show] of Object.entries(perms)) {
+    const b = $(id); if (b) b.style.display = show ? "flex" : "none";
+  }
+  $("addProductBtn").style.display = (o || a) ? "flex" : "none";
+  $("deleteAllConfirmedBtn").style.display = o ? "inline-block" : "none";
+}
+
+function updateNotificationBadge() {
+  const b = $("whatsappBadge");
+  if (newOrdersCount > 0 && !isWhatsappTabOpen) { b.style.display = "inline-block"; b.textContent = newOrdersCount; }
+  else b.style.display = "none";
+}
+function updateConfirmedBadge(c) {
+  const b = $("confirmedBadge");
+  if (c > 0) { b.style.display = "inline-block"; b.textContent = c; }
+  else b.style.display = "none";
+}
+
+/* ═══ Families ═══ */
+onValue(familiesRef, snap => {
+  const d = snap.val();
+  familiesList = d ? Object.entries(d).map(([key, v]) => ({ key, name: typeof v === 'string' ? v : (v.name || v) })) : [];
+  populateFamilySelect(); renderFamilyFilters();
+});
+function populateFamilySelect() {
+  const s = $("familySelect"); if (!s) return;
+  const cur = s.value;
+  s.innerHTML = `<option value="">${t('chooseFamily')}</option>`;
+  familiesList.forEach(({ name }) => { const o = document.createElement('option'); o.value = name; o.textContent = name; s.appendChild(o); });
+  if (cur && familiesList.some(f => f.name === cur)) s.value = cur;
+}
+function renderFamilyFilters() {
+  const sec = $("familyFilterSection"); if (!sec) return;
+  sec.querySelectorAll('.family-item-wrapper').forEach(el => el.remove());
+  const can = isAdminOrOwner();
+  familiesList.forEach(({ key, name }) => {
+    const w = document.createElement('div'); w.className = 'family-item-wrapper';
+    const b = document.createElement('button'); b.className = 'filter-btn';
+    if (currentFamilyFilter === name) b.classList.add('active');
+    b.dataset.family = name;
+    b.innerHTML = `<i class="fas fa-tag"></i> ${escapeHtml(name)} <span class="filter-count" id="count_${CSS.escape(name)}">0</span>`;
+    b.addEventListener('click', () => filterByFamily(name));
+    w.appendChild(b);
+    if (can) {
+      const a = document.createElement('div'); a.className = 'family-actions';
+      const eb = document.createElement('button'); eb.className = 'family-action-btn edit-btn'; eb.innerHTML = '<i class="fas fa-pen"></i>';
+      eb.addEventListener('click', e => { e.stopPropagation(); editFamilyName(key, name); });
+      const db2 = document.createElement('button'); db2.className = 'family-action-btn delete-btn'; db2.innerHTML = '<i class="fas fa-trash"></i>';
+      db2.addEventListener('click', e => { e.stopPropagation(); deleteFamily(key, name); });
+      a.appendChild(eb); a.appendChild(db2); w.appendChild(a);
+    }
+    sec.insertBefore(w, $("clearFilterBtn"));
+  });
+  updateFamilyCounts();
+}
+async function editFamilyName(key, oldName) {
+  const nn = prompt(`${t('editFamilyPrompt')} "${oldName}"`, oldName);
+  if (!nn || nn.trim() === oldName) return;
+  const nt = nn.trim();
+  if (familiesList.some(f => f.name === nt && f.key !== key)) return showToast(t('familyExists'));
+  await set(ref(db, `families/${key}`), nt);
+  const updates = {};
+  Object.entries(allProducts).forEach(([pid, p]) => { if (p.family === oldName) updates[`products/${pid}/family`] = nt; });
+  if (Object.keys(updates).length) await update(ref(db), updates);
+  showToast(t('familyEdited'));
+}
+async function deleteFamily(key, name) {
+  if (!confirm(`${t('confirmDeleteFamily')} "${name}"؟`)) return;
+  const updates = {};
+  Object.entries(allProducts).forEach(([pid, p]) => { if (p.family === name) updates[`products/${pid}/family`] = ""; });
+  if (Object.keys(updates).length) await update(ref(db), updates);
+  await remove(ref(db, `families/${key}`));
+  showToast("✅");
+}
+function updateFamilyCounts() {
+  $("countAll").textContent = Object.values(allProducts).filter(p => !p.hidden).length;
+  familiesList.forEach(({ name }) => {
+    const c = Object.values(allProducts).filter(p => !p.hidden && p.family === name).length;
+    const el = document.getElementById('count_' + CSS.escape(name));
+    if (el) el.textContent = c;
+  });
+}
+function filterByFamily(f) {
+  currentFamilyFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.family === f));
+  const clr = $("clearFilterBtn");
+  if (f === "الكل") clr.classList.remove('show');
+  else { clr.classList.add('show'); clr.innerHTML = `<i class="fas fa-times"></i> ✕ ${escapeHtml(f)}`; }
+  applyFiltersAndRender();
+}
+$("filterAll").addEventListener('click', () => filterByFamily("الكل"));
+$("clearFilterBtn").addEventListener('click', () => filterByFamily("الكل"));
+
+/* ═══ Products ═══ */
+onValue(productsRef, snap => {
+  allProducts = snap.val() || {};
+  applyFiltersAndRender(); renderHidden(); renderLandingList();
+  renderReviewsSection();
+});
+function applyFiltersAndRender() {
+  const term = $("searchInput").value.trim().toLowerCase();
+  let res = { ...allProducts };
+  if (currentFamilyFilter !== "الكل") res = Object.fromEntries(Object.entries(res).filter(([_, p]) => p.family === currentFamilyFilter));
+  if (term) res = Object.fromEntries(Object.entries(res).filter(([_, p]) => (p.name || '').toLowerCase().includes(term)));
+  filtered = res; currentPage = 1; renderProducts(1); updateFamilyCounts();
+}
+$("searchInput").addEventListener('input', applyFiltersAndRender);
+
+function renderProducts(page) {
+  const c = $("productsContainer"); c.innerHTML = '';
+  const arr = Object.entries(filtered).filter(([_, p]) => !p.hidden);
+  const total = Math.ceil(arr.length / PER_PAGE);
+  if (page > total) page = 1;
+  const items = arr.slice((page - 1) * PER_PAGE, (page - 1) * PER_PAGE + PER_PAGE);
+  if (!items.length) { c.innerHTML = `<div class="no-data" style="grid-column:1/-1;"><i class="fas fa-box-open"></i> ${t('noProductsMsg')}</div>`; renderPagination(0); return; }
+  const canEdit = isAdminOrOwner();
+  const cur = curLbl();
+  items.forEach(([id, p]) => {
+    const d = allDiscounts[id];
+    const onSale = d && d.isActive && (d.unlimited || (d.endDate && new Date(d.endDate).getTime() > Date.now()));
+    const promoted = p.landing && p.landing.enabled === true;
+    const card = document.createElement('div');
+    card.className = 'product-card' + (onSale ? ' on-sale' : '') + (p.hidden ? ' hidden-product' : '');
+    let priceHtml = `<div class="product-price">${fmt(p.price)} ${cur}</div>`;
+    if (onSale) priceHtml = `<div class="product-price"><span style="text-decoration:line-through;color:var(--text-muted);font-size:.8rem;margin-left:6px;">${fmt(p.price)}</span> ${fmt(d.newPrice)} ${cur}</div>`;
+    const whHtml = p.wholesalePrice ? `<div class="product-wholesale-price">🏷️ ${t('wholesaleBadgeLabel')}: ${fmt(p.wholesalePrice)}</div>` : '';
+    const boxHtml = p.quantityPerBox ? `<div class="product-box-qty">📦 ${p.quantityPerBox}</div>` : '';
+    const landingPriceHtml = (p.landing?.price && Number(p.landing.price) > 0) ? `<div style="color:#0891b2;font-weight:700;font-size:.8rem;">🚀 ${fmt(p.landing.price)}</div>` : '';
+    const badge = onSale ? `<div class="sale-badge"><i class="fas fa-tags"></i> ${d.unlimited ? t('discountActive') : t('discountTemp')}</div>` : '';
+    const promoteBadge = promoted ? `<div class="promote-badge"><i class="fas fa-rocket"></i> ${t('promotedBadge')}</div>` : '';
+    const actions = canEdit ? `
+      <button class="btn-icon btn-edit" data-id="${id}"><i class="fas fa-edit"></i> ${t('editBtn').replace('✏️ ','')}</button>
+      <button class="btn-icon btn-delete" data-id="${id}"><i class="fas fa-trash"></i> ${t('deleteBtn').replace('🗑️ ','')}</button>
+      <button class="btn-icon btn-discount ${onSale ? 'active-discount' : ''}" data-id="${id}"><i class="fas fa-tags"></i> ${t('discountBadge')}</button>
+      <button class="btn-icon btn-promote ${promoted ? 'active-promote' : ''}" data-id="${id}"><i class="fas fa-rocket"></i> ${promoted ? t('promotedBadge') : t('promotionBadge')}</button>` : '';
+    card.innerHTML = `${badge}${promoteBadge}
+      <img src="${p.imageUrl || 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f4e6.svg'}" style="object-fit:contain;padding:30px;background:#f8fafc;">
+      <div class="product-info">
+        <div class="product-name">${escapeHtml(p.name)}</div>
+        ${priceHtml}${whHtml}${boxHtml}${landingPriceHtml}
+        <div class="product-family">🏷️ ${escapeHtml(p.family || t('unknownFamily'))}</div>
+        <div class="product-actions">${actions}</div>
+      </div>`;
+    c.appendChild(card);
+  });
+  c.querySelectorAll('.btn-edit').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); editProduct(b.dataset.id); }));
+  c.querySelectorAll('.btn-delete').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); deleteProduct(b.dataset.id); }));
+  c.querySelectorAll('.btn-discount').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openDiscountModal(b.dataset.id); }));
+  c.querySelectorAll('.btn-promote').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openLandingEditModal(b.dataset.id); }));
+  renderPagination(total);
+}
+
+function renderPagination(total) {
+  const p = $("pagination"); p.innerHTML = '';
+  if (total <= 1) return;
+  const add = (txt, pg, active = false, disabled = false) => {
+    const b = document.createElement('button'); b.textContent = txt;
+    if (active) b.classList.add('active-page');
+    if (disabled) b.disabled = true;
+    b.addEventListener('click', () => { if (!disabled) { currentPage = pg; renderProducts(pg); window.scrollTo(0, 0); } });
+    p.appendChild(b);
+  };
+  add('‹', currentPage - 1, false, currentPage === 1);
+  add('1', 1, currentPage === 1);
+  if (currentPage > 3) p.insertAdjacentHTML('beforeend', '<span style="padding:0 6px;color:#64748b;">…</span>');
+  for (let i = Math.max(2, currentPage - 2); i <= Math.min(total - 1, currentPage + 2); i++) add(i, i, i === currentPage);
+  if (currentPage < total - 2) p.insertAdjacentHTML('beforeend', '<span style="padding:0 6px;color:#64748b;">…</span>');
+  if (total > 1) add(total, total, currentPage === total);
+  add('›', currentPage + 1, false, currentPage === total);
+}
+
+$("addProductBtn").addEventListener('click', () => {
+  $("productForm").reset(); $("editId").value = "";
+  $("formTitle").innerText = t('addProductTitle');
+  $("toggleVisibilityBtn").style.display = "none";
+  $("newFamilyInput").style.display = "none";
+  $("addFamilyBtn").innerHTML = `<i class="fas fa-plus"></i> ${t('addBtn')}`;
+  $("addFamilyBtn").style.background = "var(--primary)";
+  openModal("productModal");
+});
+function editProduct(id) {
+  const p = allProducts[id]; if (!p) return;
+  $("editId").value = id;
+  $("name").value = p.name || ""; $("price").value = p.price || "";
+  $("wholesalePrice").value = p.wholesalePrice || "";
+  $("quantityPerBox").value = p.quantityPerBox || "";
+  const s = $("familySelect");
+  if (p.family && !familiesList.some(f => f.name === p.family)) {
+    const o = document.createElement('option'); o.value = p.family; o.textContent = p.family; s.appendChild(o);
+  }
+  s.value = p.family || "";
+  $("formTitle").innerText = t('editProductTitle');
+  const tb = $("toggleVisibilityBtn"); tb.style.display = "inline-block"; tb.onclick = () => toggleVisibility(id);
+  openModal("productModal");
+}
+async function deleteProduct(id) {
+  if (!confirm(t('deleteProductConfirm'))) return;
+  const p = allProducts[id];
+  if (p?.deleteUrl) { try { await fetch(p.deleteUrl, { mode: 'no-cors' }); } catch (e) {} }
+  await remove(ref(db, "discounts/" + id));
+  await remove(ref(db, "products/" + id));
+  await remove(ref(db, "reviews/" + id));
+  showToast("✅");
+}
+async function toggleVisibility(id) {
+  const c = allProducts[id]; if (!c) return;
+  await update(ref(db, "products/" + id), { hidden: !c.hidden });
+  showToast(c.hidden ? t('visibilityShown') : t('visibilityHidden'));
+  closeModal("productModal");
+}
+$("addFamilyBtn").addEventListener('click', async function() {
+  const inp = $("newFamilyInput"), btn = this;
+  if (inp.style.display === "none") {
+    inp.style.display = "block"; inp.focus();
+    btn.innerHTML = '<i class="fas fa-check"></i>'; btn.style.background = "#059669";
+    return;
+  }
+  const n = inp.value.trim();
+  if (!n) return showToast(t('fillFields'));
+  if (familiesList.some(f => f.name === n)) return showToast(t('familyExists'));
+  await set(push(familiesRef), n);
+  showToast(`✅ ${n}`);
+  inp.value = ""; inp.style.display = "none";
+  btn.innerHTML = `<i class="fas fa-plus"></i> ${t('addBtn')}`; btn.style.background = "var(--primary)";
+});
+
+async function uploadImage(file) {
+  if (!imgbbKey) throw new Error(t('fillImgbb'));
+  const fd = new FormData(); fd.append("image", file);
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, { method: "POST", body: fd });
+  const d = await res.json();
+  if (!d.success) throw new Error(t('uploadFailed'));
+  return { url: d.data.url, deleteUrl: d.data.delete_url };
+}
+
+$("productForm").addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = $("editId").value;
+  const name = $("name").value.trim();
+  const price = parseFloat($("price").value) || 0;
+  const wh = parseFloat($("wholesalePrice").value) || 0;
+  const qb = parseInt($("quantityPerBox").value) || 0;
+  const fam = $("familySelect").value;
+  const file = $("imageFile").files[0] || $("cameraInput").files[0];
+  const ex = allProducts[id];
+  let nImg = ex?.imageUrl || "", nDel = ex?.deleteUrl || "";
+  closeModal("productModal"); showToast(t('processing'));
+  try {
+    if (file) {
+      if (ex?.deleteUrl) { try { await fetch(ex.deleteUrl, { mode: 'no-cors' }); } catch (e) {} }
+      const up = await uploadImage(file);
+      nImg = up.url; nDel = up.deleteUrl;
+    }
+    const data = { name, price, wholesalePrice: wh > 0 ? wh : null, quantityPerBox: qb > 0 ? qb : null, family: fam || "", imageUrl: nImg, deleteUrl: nDel, hidden: ex?.hidden || false };
+    if (ex?.landing) data.landing = ex.landing;
+    if (id) await update(ref(db, "products/" + id), data);
+    else await push(productsRef, data);
+    showToast(t('saved')); $("productForm").reset();
+  } catch (err) { showToast("❌ " + err.message); }
+});
+
+/* ═══ Discounts ═══ */
+onValue(discountsRef, snap => {
+  const d = snap.val() || {};
+  const now = Date.now();
+  Object.entries(d).forEach(([pid, disc]) => {
+    if (disc.isActive && !disc.unlimited && disc.endDate && new Date(disc.endDate).getTime() < now) {
+      update(ref(db, `discounts/${pid}`), { isActive: false }).catch(() => {});
+    }
+  });
+  allDiscounts = d; renderProducts(currentPage); renderDiscountsList();
+});
+function renderDiscountsList() {
+  const c = $("discountsContainer"); c.innerHTML = '';
+  const acts = Object.entries(allDiscounts).filter(([_, d]) => d.isActive);
+  if (!acts.length) { c.innerHTML = `<div class="no-data" style="grid-column:1/-1;"><i class="fas fa-tag"></i> ${t('noDiscounts')}</div>`; return; }
+  const canDelete = isAdminOrOwner();
+  const cur = curLbl();
+  acts.forEach(([id, d]) => {
+    const p = allProducts[id]; if (!p) return;
+    const card = document.createElement('div'); card.className = 'product-card on-sale';
+    const removeBtn = canDelete
+      ? `<div class="product-actions" style="margin-top:8px;"><button class="btn-icon btn-delete" data-remove="${id}"><i class="fas fa-trash"></i> ${t('removeBtn').replace('🗑️ ','')}</button></div>`
+      : '';
+    card.innerHTML = `${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}">` : ''}
+      <div class="sale-badge"><i class="fas fa-tags"></i> ${d.unlimited ? t('discountActive') : t('discountTemp')}</div>
+      <div class="product-info">
+        <div class="product-name">${escapeHtml(p.name)}</div>
+        <div class="product-price"><span style="text-decoration:line-through;color:var(--text-muted);font-size:.8rem;margin-left:6px;">${fmt(p.price)}</span> ${fmt(d.newPrice)} ${cur}</div>
+        ${removeBtn}
+      </div>`;
+    c.appendChild(card);
+  });
+  c.querySelectorAll('[data-remove]').forEach(b => b.addEventListener('click', () => {
+    if (!isAdminOrOwner()) return showToast(t('discountRemoveNotAllowed'));
+    if (confirm(t('confirmRemoveDiscount'))) remove(ref(db, "discounts/" + b.dataset.remove)).then(() => showToast("✅"));
+  }));
+}
+function openDiscountModal(id) {
+  const p = allProducts[id]; if (!p) return;
+  $("discountProductId").value = id; $("discountProductName").textContent = p.name;
+  const d = allDiscounts[id];
+  if (d && d.isActive) {
+    $("discountNewPrice").value = d.newPrice || '';
+    $("discountUnlimited").checked = d.unlimited || false;
+    $("discountStartDate").value = d.startDate ? d.startDate.slice(0, 16) : '';
+    $("discountEndDate").value = d.endDate ? d.endDate.slice(0, 16) : '';
+    $("removeDiscountBtn").style.display = "inline-block";
+  } else {
+    $("discountNewPrice").value = ''; $("discountUnlimited").checked = false;
+    $("discountStartDate").value = ''; $("discountEndDate").value = '';
+    $("removeDiscountBtn").style.display = "none";
+  }
+  $("discountDateGroup").style.display = $("discountUnlimited").checked ? "none" : "block";
+  openModal("discountModal");
+}
+$("discountUnlimited").addEventListener('change', function() {
+  $("discountDateGroup").style.display = this.checked ? "none" : "block";
+});
+$("saveDiscountBtn").addEventListener('click', async () => {
+  const id = $("discountProductId").value;
+  const newPrice = parseFloat($("discountNewPrice").value);
+  const unlimited = $("discountUnlimited").checked;
+  let start = $("discountStartDate").value, end = $("discountEndDate").value;
+  if (!id || isNaN(newPrice) || newPrice <= 0) return showToast(t('wrongPrice'));
+  if (newPrice >= allProducts[id].price) return showToast(t('priceMustBeLess'));
+  if (!unlimited) {
+    if (!start || !end) return showToast(t('setDuration'));
+    if (new Date(start) >= new Date(end)) return showToast(t('wrongTime'));
+    start = new Date(start).toISOString(); end = new Date(end).toISOString();
+  } else { start = null; end = null; }
+  await set(ref(db, `discounts/${id}`), { productId: id, newPrice, unlimited, startDate: start, endDate: end, isActive: true, createdAt: Date.now() });
+  showToast("✅"); closeModal("discountModal");
+});
+$("removeDiscountBtn").addEventListener('click', async () => {
+  const id = $("discountProductId").value;
+  if (id && confirm(t('confirmRemoveDiscount'))) { await remove(ref(db, `discounts/${id}`)); showToast("✅"); closeModal("discountModal"); }
+});
+
+/* ═══ Hidden ═══ */
+function renderHidden() {
+  const c = $("hiddenProductsContainer"); c.innerHTML = '';
+  if (getRole() === "seller") { c.innerHTML = `<div class='no-data'>${t('hiddenLocked')}</div>`; return; }
+  const hidden = Object.entries(allProducts).filter(([_, p]) => p.hidden);
+  if (!hidden.length) { c.innerHTML = `<div class='no-data'>${t('noHiddenProducts')}</div>`; return; }
+  const cur = curLbl();
+  hidden.forEach(([id, p]) => {
+    const card = document.createElement('div'); card.className = 'product-card';
+    card.innerHTML = `${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}">` : ''}
+      <div class="product-info">
+        <div class="product-name">${escapeHtml(p.name)}</div>
+        <div class="product-price">${fmt(p.price)} ${cur}</div>
+        <div class="product-actions"><button class="btn-icon btn-edit" data-id="${id}"><i class="fas fa-edit"></i> ${t('editBtn').replace('✏️ ','')}</button></div>
+      </div>`;
+    c.appendChild(card);
+  });
+  c.querySelectorAll('.btn-edit').forEach(b => b.addEventListener('click', () => editProduct(b.dataset.id)));
+}
+
+/* ═══ Landing List ═══ */
+function renderLandingList() {
+  const c = $("landingListContainer"); if (!c) return;
+  const items = Object.entries(allProducts).filter(([_, p]) => p.landing && p.landing.enabled === true);
+  if (!items.length) {
+    c.innerHTML = `<div class="no-data" style="padding:40px 20px;"><i class="fas fa-rocket" style="color:#c4b5fd;"></i><h3 style="color:#7c3aed;font-weight:800;margin:8px 0;font-size:1rem;">${t('noLandingPages')}</h3><p style="font-size:.85rem;">${t('goToProductsActivate')}</p></div>`;
+    return;
+  }
+  const cur = curLbl();
+  c.innerHTML = items.map(([id, p]) => {
+    const img = p.landing?.logo || p.imageUrl || 'https://via.placeholder.com/64';
+    const customPrice = p.landing?.price && Number(p.landing.price) > 0 ? `<span style="color:#0891b2;"><i class="fas fa-rocket"></i> ${fmt(p.landing.price)} ${cur}</span>` : '';
+    const displayName = p.landing?.pageName || p.name;
+    return `<div class="landing-item" style="border:2px solid #7c3aed;background:#faf5ff;">
+      <img src="${escapeHtml(img)}" onerror="this.src='https://via.placeholder.com/64'">
+      <div class="info">
+        <h4>${escapeHtml(displayName)}</h4>
+        <div class="meta">
+          <span><i class="fas fa-tag"></i> ${escapeHtml(p.family || t('unknownFamily'))}</span>
+          <span><i class="fas fa-coins"></i> ${fmt(p.price)} ${cur}</span>
+          ${customPrice}
+        </div>
+        <span style="display:inline-block;padding:2px 10px;border-radius:30px;font-size:.65rem;font-weight:700;margin-top:6px;background:#d1fae5;color:#065f46;"><i class="fas fa-check-circle"></i> ${t('landingActive')}</span>
+      </div>
+      <div class="actions">
+        <button class="landing-edit-btn" data-edit="${id}"><i class="fas fa-pen"></i> ${t('editBtn').replace('✏️ ','')}</button>
+        <button class="landing-copy-btn" data-copy="${id}"><i class="fas fa-copy"></i> ${t('copyBtn').replace('📋 ','')}</button>
+        <button class="landing-open-btn" data-open="${id}"><i class="fas fa-external-link-alt"></i> ${t('openBtn').replace('🔗 ','')}</button>
+      </div>
+    </div>`;
+  }).join('');
+  c.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openLandingEditModal(b.dataset.edit)));
+  c.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => copyLandingUrl(b.dataset.copy)));
+  c.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openLandingUrl(b.dataset.open)));
+}
+
+function buildLandingUrl(productId) {
+  const url = new URL(window.location.href);
+  let path = url.pathname;
+  const lastSlash = path.lastIndexOf('/');
+  let dir;
+  if (lastSlash === -1) {
+    dir = '/';
+  } else if (lastSlash === path.length - 1) {
+    dir = path;
+  } else {
+    dir = path.substring(0, lastSlash + 1);
+  }
+  return url.origin + dir + 'product.html?id=' + encodeURIComponent(productId);
+}
+function copyLandingUrl(productId) {
+  const url = buildLandingUrl(productId);
+  try {
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url);
+    else { const t2 = document.createElement('textarea'); t2.value = url; t2.style.position = "fixed"; t2.style.opacity = "0"; document.body.appendChild(t2); t2.select(); document.execCommand('copy'); document.body.removeChild(t2); }
+    showToast(t('linkCopied'));
+  } catch (e) { alert("URL:\n" + url); }
+}
+function openLandingUrl(productId) { window.open(buildLandingUrl(productId), '_blank'); }
+
+/* ═══ Landing Edit Modal ═══ */
+function openLandingEditModal(id) {
+  const p = allProducts[id]; if (!p) return;
+  $("landingEditProductId").value = id;
+  $("landingEditProductName").textContent = p.name;
+  const l = p.landing || {};
+  $("landingEnabled").checked = l.enabled === true;
+  $("landingPageName").value = l.pageName || "";
+  $("landingProductName").value = l.productName || "";
+  $("landingPrice").value = (l.price !== undefined && l.price !== null && Number(l.price) > 0) ? l.price : "";
+  $("landingAnnouncementItem").value = l.announcement || "";
+  $("landingDescription").value = l.description || "";
+  $("landingItemPixel").value = l.pixelId || "";
+  $("landingItemTiktokPixel").value = l.tiktokPixelId || "";
+  $("landingShowReviews").checked = l.showReviews !== false;
+  $("landingShowVisitors").checked = l.showVisitors !== false;
+  currentLandingImages = Array.isArray(l.images) ? [...l.images] : [];
+  renderLandingImages();
+  currentLandingLogo = l.logo || "";
+  renderLandingLogo();
+  currentFeatures = [];
+  if (Array.isArray(l.features)) {
+    l.features.forEach(f => {
+      if (typeof f === 'string') currentFeatures.push({ iconType:'fa', icon:'fa-check-circle', text:f });
+      else {
+        let type = 'fa';
+        let icon = f.icon || 'fa-check-circle';
+        if (String(icon).startsWith('http')) type = 'image';
+        else if (!String(icon).startsWith('fa-') && String(icon).length <= 4) type = 'emoji';
+        else if (String(icon).startsWith('fa-')) type = 'fa';
+        else type = 'image';
+        currentFeatures.push({ iconType: type, icon: icon, text: f.text || '' });
+      }
+    });
+  }
+  renderFeaturesList();
+  $("landingUrl").value = buildLandingUrl(id);
+  $("landingUrlBox").style.display = "block";
+  openModal("landingEditModal");
+}
+
+function renderLandingLogo() {
+  const preview = $("landingLogoPreview");
+  const empty = $("landingLogoEmpty");
+  if (currentLandingLogo) {
+    preview.src = currentLandingLogo;
+    preview.style.display = "block";
+    empty.style.display = "none";
+  } else {
+    preview.src = "";
+    preview.style.display = "none";
+    empty.style.display = "flex";
+  }
+}
+
+async function handleLandingLogoFile(file) {
+  if (!file) return;
+  if (!imgbbKey) { showToast(t('fillImgbb')); return; }
+  showToast(t('uploadingLogo'));
+  try {
+    const up = await uploadImage(file);
+    currentLandingLogo = up.url;
+    renderLandingLogo();
+    showToast(t('logoUploaded'));
+  } catch (e) { showToast("❌ " + e.message); }
+}
+
+$("btnUploadLogoGallery").addEventListener('click', () => $("landingLogoFile").click());
+$("btnUploadLogoCamera").addEventListener('click', () => $("landingLogoCamera").click());
+$("landingLogoFile").addEventListener('change', e => {
+  handleLandingLogoFile(e.target.files[0]);
+  e.target.value = "";
+});
+$("landingLogoCamera").addEventListener('change', e => {
+  handleLandingLogoFile(e.target.files[0]);
+  e.target.value = "";
+});
+$("btnRemoveLogo").addEventListener('click', () => {
+  if (!currentLandingLogo) return showToast(t('noLogoMsg'));
+  if (!confirm(t('confirmDeleteLogo'))) return;
+  currentLandingLogo = "";
+  renderLandingLogo();
+  showToast(t('logoRemoved'));
+});
+
+function renderLandingImages() {
+  const g = $("landingImagesGrid");
+  if (!currentLandingImages.length) { g.innerHTML = `<div class="landing-img-empty">${t('noImagesYet')}</div>`; return; }
+  g.innerHTML = currentLandingImages.map((url, idx) => `
+    <div class="landing-img-box">
+      <img src="${escapeHtml(url)}" onerror="this.style.background='#f1f5f9';this.removeAttribute('src');">
+      <button type="button" class="del-btn" data-idx="${idx}"><i class="fas fa-times"></i></button>
+      ${idx === 0 ? '<div class="main-tag">★</div>' : ''}
+    </div>
+  `).join('');
+  g.querySelectorAll('.del-btn').forEach(b => b.addEventListener('click', () => {
+    if (!confirm(t('confirmDelete'))) return;
+    currentLandingImages.splice(parseInt(b.dataset.idx), 1);
+    renderLandingImages();
+  }));
+}
+
+async function handleLandingFiles(files) {
+  if (!files || !files.length) return;
+  if (!imgbbKey) { showToast(t('fillImgbb')); return; }
+  $("btnUploadGallery").classList.add('loading');
+  $("btnUploadCamera").classList.add('loading');
+  showToast(`${t('uploadingNImages')}${files.length}...`);
+  let count = 0;
+  for (const file of files) {
+    try { const up = await uploadImage(file); currentLandingImages.push(up.url); count++; renderLandingImages(); } catch (e) { console.error(e); }
+  }
+  $("btnUploadGallery").classList.remove('loading');
+  $("btnUploadCamera").classList.remove('loading');
+  if (count > 0) showToast(`${t('imagesUploaded')}${count}`);
+  else showToast(t('uploadFailed'));
+}
+$("btnUploadGallery").addEventListener('click', () => $("landingImageFile").click());
+$("btnUploadCamera").addEventListener('click', () => $("landingCameraInput").click());
+$("landingImageFile").addEventListener('change', e => { handleLandingFiles(Array.from(e.target.files || [])); e.target.value = ""; });
+$("landingCameraInput").addEventListener('change', e => { handleLandingFiles(Array.from(e.target.files || [])); e.target.value = ""; });
+
+function renderIconHtml(iconType, icon, defaultFa = 'fa-check-circle') {
+  if (!icon) return `<i class="fas ${defaultFa}"></i>`;
+  if (iconType === 'image' || String(icon).startsWith('http')) {
+    return `<img src="${escapeHtml(icon)}" onerror="this.parentElement.innerHTML='<i class=\\'fas ${defaultFa}\\'></i>'">`;
+  }
+  if (iconType === 'emoji') return `<span style="font-size:1.4rem">${escapeHtml(icon)}</span>`;
+  const faClass = String(icon).startsWith('fa-') ? String(icon) : 'fa-' + String(icon);
+  return `<i class="fas ${escapeHtml(faClass)}"></i>`;
+}
+
+function renderFeaturesList() {
+  const c = $("featuresList");
+  if (!currentFeatures.length) {
+    c.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:.8rem;padding:14px;">${t('noFeaturesYet')}</div>`;
+    return;
+  }
+  c.innerHTML = currentFeatures.map((f, i) => `
+    <div class="dyn-item">
+      <button type="button" class="icon-btn" data-feat-icon="${i}">
+        ${renderIconHtml(f.iconType, f.icon)}
+      </button>
+      <input type="text" placeholder="${t('featurePlaceholder')}" data-feat-text="${i}" value="${escapeHtml(f.text || '')}" />
+      <button type="button" class="rm-btn" data-feat-rm="${i}"><i class="fas fa-trash"></i></button>
+    </div>
+  `).join('');
+  c.querySelectorAll('[data-feat-text]').forEach(inp => inp.addEventListener('input', e => {
+    currentFeatures[parseInt(inp.dataset.featText)].text = e.target.value;
+  }));
+  c.querySelectorAll('[data-feat-rm]').forEach(b => b.addEventListener('click', () => {
+    currentFeatures.splice(parseInt(b.dataset.featRm), 1); renderFeaturesList();
+  }));
+  c.querySelectorAll('[data-feat-icon]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    openIconPicker({ type: 'feature', index: parseInt(b.dataset.featIcon) });
+  }));
+}
+$("addFeatureBtn").addEventListener('click', () => {
+  currentFeatures.push({ iconType:'fa', icon:'fa-check-circle', text:'' });
+  renderFeaturesList();
+});
+
+function renderPoliciesList() {
+  const c = $("policiesListContainer");
+  if (!currentPolicies.length) {
+    c.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:.82rem;padding:20px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px;">
+      ${t('noPoliciesYet')}<br><span style="font-size:.75rem;">${t('noPoliciesHint')}</span>
+    </div>`;
+    return;
+  }
+  c.innerHTML = currentPolicies.map((p, i) => `
+    <div class="dyn-item-policy">
+      <div class="row">
+        <input type="text" placeholder="${t('policyTitlePlaceholder')}" data-pol-title="${i}" value="${escapeHtml(p.title || '')}" />
+        <button type="button" class="rm-btn" data-pol-rm="${i}"><i class="fas fa-trash"></i></button>
+      </div>
+      <textarea placeholder="${t('policyContentPlaceholder')}" data-pol-content="${i}">${escapeHtml(p.content || '')}</textarea>
+    </div>
+  `).join('');
+  c.querySelectorAll('[data-pol-title]').forEach(inp => inp.addEventListener('input', e => {
+    currentPolicies[parseInt(inp.dataset.polTitle)].title = e.target.value;
+  }));
+  c.querySelectorAll('[data-pol-content]').forEach(ta => ta.addEventListener('input', e => {
+    currentPolicies[parseInt(ta.dataset.polContent)].content = e.target.value;
+  }));
+  c.querySelectorAll('[data-pol-rm]').forEach(b => b.addEventListener('click', () => {
+    if (!confirm(t('confirmDeletePolicy'))) return;
+    currentPolicies.splice(parseInt(b.dataset.polRm), 1);
+    renderPoliciesList();
+  }));
+}
+$("addPolicyBtn").addEventListener('click', () => {
+  currentPolicies.push({ title:'', content:'' });
+  renderPoliciesList();
+  setTimeout(() => {
+    const el = $("policiesListContainer");
+    if (el.lastElementChild) el.lastElementChild.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 100);
+});
+
+function openIconPicker(target) {
+  iconPickerTarget = target;
+  $("iconPicker").classList.add('show');
+  renderIconCats(); renderIconGrid();
+}
+function renderIconCats() {
+  const c = $("iconCats");
+  c.innerHTML = Object.keys(FA_ICONS).map(cat => `<button type="button" data-cat="${cat}" class="${cat === currentIconCategory ? 'active' : ''}">${cat}</button>`).join('');
+  c.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    currentIconCategory = b.dataset.cat; renderIconCats(); renderIconGrid();
+  }));
+}
+function renderIconGrid() {
+  const g = $("iconGrid");
+  const list = FA_ICONS[currentIconCategory] || [];
+  g.innerHTML = list.map(item => `<button type="button" title="${item.n}" data-fa="${item.i}"><i class="fas ${item.i}"></i></button>`).join('');
+  g.querySelectorAll('button[data-fa]').forEach(b => b.addEventListener('click', () => {
+    applyIconChoice('fa', b.dataset.fa);
+  }));
+}
+function applyIconChoice(type, value) {
+  if (!iconPickerTarget) return;
+  const { type: tp, index } = iconPickerTarget;
+  if (tp === 'feature') {
+    currentFeatures[index].iconType = type;
+    currentFeatures[index].icon = value;
+    renderFeaturesList();
+  }
+  $("iconPicker").classList.remove('show');
+}
+$("iconPickerClose").addEventListener('click', () => $("iconPicker").classList.remove('show'));
+$("iconPicker").addEventListener('click', e => { if (e.target === $("iconPicker")) $("iconPicker").classList.remove('show'); });
+
+$("uploadCustomIcon").addEventListener('click', () => $("customIconFile").click());
+$("customIconFile").addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  if (!imgbbKey) { showToast(t('fillImgbb')); e.target.value = ""; return; }
+  showToast(t('uploadingLogo'));
+  try {
+    const up = await uploadImage(file);
+    applyIconChoice('image', up.url);
+    showToast(t('logoUploaded'));
+  } catch (err) { showToast("❌ " + err.message); }
+  e.target.value = "";
+});
+
+$("copyLandingUrl").addEventListener('click', () => {
+  const v = $("landingUrl").value;
+  try {
+    if (navigator.clipboard) navigator.clipboard.writeText(v);
+    else { $("landingUrl").removeAttribute('readonly'); $("landingUrl").select(); document.execCommand('copy'); $("landingUrl").setAttribute('readonly', ''); }
+    showToast("✅");
+  } catch (e) { showToast("⚠️"); }
+});
+$("openLandingUrl").addEventListener('click', () => { const v = $("landingUrl").value; if (v) window.open(v, '_blank'); });
+
+$("saveLandingBtn").addEventListener('click', async () => {
+  const id = $("landingEditProductId").value;
+  if (!id) return;
+  const enabled = $("landingEnabled").checked;
+  const pageName = $("landingPageName").value.trim();
+  const productName = $("landingProductName").value.trim();
+  const customPrice = parseFloat($("landingPrice").value);
+  const announcement = $("landingAnnouncementItem").value.trim();
+  const description = $("landingDescription").value.trim();
+  const images = currentLandingImages.length ? [...currentLandingImages] : null;
+  const features = currentFeatures
+    .filter(f => (f.text || '').trim() && (f.icon || '').trim())
+    .map(f => ({ iconType: f.iconType || 'fa', icon: f.icon, text: (f.text || '').trim() }));
+  const pixelId = $("landingItemPixel").value.trim();
+  const tiktokPixelId = $("landingItemTiktokPixel").value.trim();
+  const showReviews = $("landingShowReviews").checked;
+  const showVisitors = $("landingShowVisitors").checked;
+  const landingData = {
+    enabled, pageName: pageName || null, productName: productName || null,
+    logo: currentLandingLogo || null,
+    price: (!isNaN(customPrice) && customPrice > 0) ? customPrice : null,
+    announcement: announcement || null, description: description || null,
+    images: images, features: features.length ? features : null,
+    pixelId: pixelId || null,
+    tiktokPixelId: tiktokPixelId || null,
+    showReviews, showVisitors,
+    updatedAt: Date.now()
+  };
+  try {
+    await update(ref(db, "products/" + id), { landing: landingData });
+    showToast(t('saved'));
+    closeModal("landingEditModal");
+  } catch (e) { showToast("❌ " + e.message); }
+});
+
+$("btnLandingSettings").addEventListener('click', () => {
+  if (!isOwner()) return showToast(t('notAllowed'));
+  openModal("landingSettingsModal");
+});
+$("saveLandingSettingsBtn").addEventListener('click', async () => {
+  const snap = await get(ref(db, 'store/landing'));
+  const existing = snap.val() || {};
+  const data = {
+    announcement: $("landingAnnouncement").value.trim(),
+    enablePixel: existing.enablePixel === true,
+    pixelId: existing.pixelId || "",
+    enableTiktokPixel: existing.enableTiktokPixel === true,
+    tiktokPixelId: existing.tiktokPixelId || "",
+    enableReviews: $("landingEnableReviews").checked,
+    enableVisitors: $("landingEnableVisitors").checked,
+    policies: existing.policies || [],
+    updatedAt: Date.now()
+  };
+  try { await set(ref(db, "store/landing"), data); showToast("✅"); closeModal("landingSettingsModal"); }
+  catch (e) { showToast("❌"); }
+});
+
+/* ═══ 🎯 نافذة البكسل (Facebook + TikTok) ═══ */
+$("btnPixels").addEventListener('click', () => {
+  if (!isOwner()) return showToast(t('notAllowed'));
+  /* تحميل القيم الحالية */
+  $("pixelEnableFB").checked = landingGlobal.enablePixel;
+  $("pixelFBId").value = landingGlobal.pixelId;
+  $("pixelEnableTT").checked = landingGlobal.enableTiktokPixel;
+  $("pixelTTId").value = landingGlobal.tiktokPixelId;
+  openModal("pixelsModal");
+});
+
+$("savePixelsBtn").addEventListener('click', async () => {
+  const snap = await get(ref(db, 'store/landing'));
+  const existing = snap.val() || {};
+  const data = {
+    announcement: existing.announcement || "",
+    enablePixel: $("pixelEnableFB").checked,
+    pixelId: $("pixelFBId").value.trim(),
+    enableTiktokPixel: $("pixelEnableTT").checked,
+    tiktokPixelId: $("pixelTTId").value.trim(),
+    enableReviews: existing.enableReviews !== false,
+    enableVisitors: existing.enableVisitors !== false,
+    policies: existing.policies || [],
+    updatedAt: Date.now()
+  };
+  try {
+    await set(ref(db, "store/landing"), data);
+    showToast("✅ " + t('saved'));
+    closeModal("pixelsModal");
+  } catch (e) {
+    showToast("❌ " + t('saveFailed'));
+  }
+});
+
+$("btnPolicies").addEventListener('click', () => {
+  if (!isAdminOrOwner()) return showToast(t('notAllowed'));
+  renderPoliciesList();
+  openModal("policiesModal");
+});
+$("savePoliciesBtn").addEventListener('click', async () => {
+  const policies = currentPolicies
+    .filter(p => (p.title || '').trim() || (p.content || '').trim())
+    .map(p => ({ title: (p.title || '').trim(), content: (p.content || '').trim() }));
+  const snap = await get(ref(db, 'store/landing'));
+  const existing = snap.val() || {};
+  const data = {
+    announcement: existing.announcement || "",
+    enablePixel: existing.enablePixel === true,
+    pixelId: existing.pixelId || "",
+    enableTiktokPixel: existing.enableTiktokPixel === true,
+    tiktokPixelId: existing.tiktokPixelId || "",
+    enableReviews: existing.enableReviews !== false,
+    enableVisitors: existing.enableVisitors !== false,
+    policies: policies, updatedAt: Date.now()
+  };
+  try { await set(ref(db, "store/landing"), data); showToast(t('saved')); closeModal("policiesModal"); }
+  catch (e) { showToast(t('saveFailed')); }
+});
+
+/* ═══ Shipping Zones ═══ */
+const WILAYAS = ["أدرار","الشلف","الأغواط","أم البواقي","باتنة","بجاية","بسكرة","بشار","البليدة","البويرة","تمنراست","تبسة","تلمسان","تيارت","تيزي وزو","الجزائر","الجلفة","جيجل","سطيف","سعيدة","سكيكدة","سيدي بلعباس","عنابة","قالمة","قسنطينة","المدية","مستغانم","المسيلة","معسكر","ورقلة","وهران","البيض","إليزي","برج بوعريريج","بومرداس","الطارف","تندوف","تيسمسيلت","الوادي","خنشلة","سوق أهراس","تيبازة","ميلة","عين الدفلى","النعامة","عين تموشنت","غرداية","غليزان","تيميمون","برج باجي مختار","أولاد جلال","بني عباس","إن صالح","إن قزام","تقرت","جانت","المغير","المنيعة"];
+$("btnShippingZones").addEventListener('click', () => {
+  if (!isAdminOrOwner()) return showToast(t('notAllowed'));
+  renderZonesList(); openModal("shippingZonesModal");
+});
+function renderZonesList() {
+  const c = $("zonesListContainer"); if (!c) return;
+  if (!shippingZones.length) { c.innerHTML = `<div class="no-data" style="padding:30px;"><i class="fas fa-truck"></i> ${t('noZones')}</div>`; return; }
+  const cur = curLbl();
+  c.innerHTML = shippingZones.map(z => `
+    <div class="zone-card">
+      <div class="zone-head"><h4>${escapeHtml(z.name || '')}</h4><span style="font-size:.72rem;color:var(--text-muted);">${(z.wilayas || []).length}</span></div>
+      <div class="zone-info"><span>🏠 ${z.homePrice || 0} ${cur}</span><span>🏢 ${z.deskPrice || 0} ${cur}</span></div>
+      <div class="zone-wilayas">${escapeHtml((z.wilayas || []).join(' • ') || '---')}</div>
+      <div class="zone-actions">
+        <button class="zone-edit-btn" data-zone-edit="${z.id}">${t('editBtn')}</button>
+        <button class="zone-delete-btn" data-zone-del="${z.id}">${t('deleteBtn')}</button>
+      </div>
+    </div>
+  `).join('');
+  c.querySelectorAll('[data-zone-edit]').forEach(b => b.addEventListener('click', () => openZoneEdit(b.dataset.zoneEdit)));
+  c.querySelectorAll('[data-zone-del]').forEach(b => b.addEventListener('click', () => deleteZone(b.dataset.zoneDel)));
+}
+function openZoneEdit(id) {
+  const z = id ? shippingZones.find(x => x.id === id) : null;
+  $("zoneEditTitle").innerHTML = `<i class="fas fa-map-marked-alt"></i> <span>${id ? t('editBtn') : t('zoneTitle')}</span>`;
+  $("zoneEditId").value = id || "";
+  $("zoneName").value = z ? (z.name || "") : "";
+  $("zoneHomePrice").value = z ? (z.homePrice || 0) : "";
+  $("zoneDeskPrice").value = z ? (z.deskPrice || 0) : "";
+  renderWilayaSelector(z && Array.isArray(z.wilayas) ? z.wilayas : []);
+  openModal("zoneEditModal");
+}
+function renderWilayaSelector(selected) {
+  const c = $("wilayaSelector");
+  c.innerHTML = WILAYAS.map(w => `<label class="wilaya-check-item"><input type="checkbox" value="${escapeHtml(w)}" ${selected.includes(w) ? 'checked' : ''}><span>${escapeHtml(w)}</span></label>`).join('');
+  updateSelectedCount();
+  c.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', updateSelectedCount));
+}
+function updateSelectedCount() { $("selectedWilayaCount").textContent = document.querySelectorAll('#wilayaSelector input:checked').length; }
+$("selectAllWilayas").addEventListener('click', () => { document.querySelectorAll('#wilayaSelector input').forEach(cb => cb.checked = true); updateSelectedCount(); });
+$("clearAllWilayas").addEventListener('click', () => { document.querySelectorAll('#wilayaSelector input').forEach(cb => cb.checked = false); updateSelectedCount(); });
+$("addZoneBtn").addEventListener('click', () => openZoneEdit(null));
+$("saveZoneBtn").addEventListener('click', async () => {
+  const id = $("zoneEditId").value;
+  const name = $("zoneName").value.trim();
+  const homePrice = parseFloat($("zoneHomePrice").value) || 0;
+  const deskPrice = parseFloat($("zoneDeskPrice").value) || 0;
+  const wilayas = Array.from(document.querySelectorAll('#wilayaSelector input:checked')).map(cb => cb.value);
+  if (!name) return showToast(t('zoneNameRequired'));
+  if (!wilayas.length) return showToast(t('wilayaRequired'));
+  const data = { name, homePrice, deskPrice, wilayas, updatedAt: Date.now() };
+  try {
+    if (id) await update(ref(db, "store/shipping_zones/" + id), data);
+    else await push(ref(db, "store/shipping_zones"), data);
+    showToast("✅"); closeModal("zoneEditModal");
+  } catch (e) { showToast("❌"); }
+});
+async function deleteZone(id) {
+  if (!confirm(t('confirmDeleteZone'))) return;
+  try { await remove(ref(db, "store/shipping_zones/" + id)); showToast("✅"); } catch (e) { showToast("❌"); }
+}
+
+/* ═══ Orders ═══ */
+onValue(ordersRef, snap => renderWhatsappOrders(snap.val()));
+onValue(confirmedRef, snap => renderConfirmedOrders(snap.val()));
+
+function renderWhatsappOrders(data) {
+  const c = $("whatsappOrdersContainer"); c.innerHTML = '';
+  const arr = Object.entries(data || {});
+  currentOrderCount = arr.length;
+  newOrdersCount = currentOrderCount > lastSeenCount ? currentOrderCount - lastSeenCount : 0;
+  updateNotificationBadge();
+  if (!arr.length) { c.innerHTML = `<div class='no-data'>${t('noOrders')}</div>`; return; }
+  const cur = curLbl();
+  arr.reverse().forEach(([key, o]) => {
+    const card = document.createElement('div'); card.className = 'order-card whatsapp-orders';
+    const shortAddr = (o.address || '').length > 30 ? o.address.substring(0, 27) + '...' : (o.address || '');
+    const srcBadge = o.source === 'landing' ? `<span class="landing-source-badge"><i class="fas fa-rocket"></i> ${t('promotionBadge')}</span>` : `<span class="whatsapp-badge">${t('newOrderBadge')}</span>`;
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between;">
+        <div><span style="font-weight:700;">${escapeHtml(o.customerName || '')}</span> ${srcBadge}</div>
+        <span style="color:#10b981; font-weight:800;">${fmt(o.totalPrice)} ${cur}</span>
+      </div>
+      <div style="font-size:13px; color:#6b7280; margin-top:6px;">
+        <span><i class="fas fa-phone"></i> ${escapeHtml(o.phone || '')}</span> | <span><i class="fas fa-map-marker-alt"></i> ${escapeHtml(shortAddr)}</span>
+      </div>
+      <div style="font-size:11px; color:#9ca3af; margin-top:4px;"><i class="far fa-clock"></i> ${new Date(o.timestamp).toLocaleString('ar-DZ')}</div>`;
+    card.addEventListener('click', () => openOrderDetailModal(o, 'whatsapp', key));
+    c.appendChild(card);
+  });
+}
+
+function renderConfirmedOrders(data) {
+  const c = $("confirmedOrdersContainer"); c.innerHTML = '';
+  const arr = Object.entries(data || {});
+  updateConfirmedBadge(arr.length);
+  if (!arr.length) { c.innerHTML = `<div class='no-data'>${t('noConfirmedOrders')}</div>`; return; }
+  const cur = curLbl();
+  arr.reverse().forEach(([key, o]) => {
+    const card = document.createElement('div'); card.className = 'order-card confirmed-card';
+    const shortAddr = (o.address || '').length > 30 ? o.address.substring(0, 27) + '...' : (o.address || '');
+    const date = o.confirmedAt ? new Date(o.confirmedAt).toLocaleString('ar-DZ') : '---';
+    const srcBadge = o.source === 'landing' ? `<span class="landing-source-badge"><i class="fas fa-rocket"></i> ${t('promotionBadge')}</span>` : `<span class="confirmed-badge">${t('confirmedBadge')}</span>`;
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between;">
+        <div><span style="font-weight:700;">${escapeHtml(o.customerName || '')}</span> ${srcBadge}</div>
+        <span style="color:#f39c12; font-weight:800;">${fmt(o.totalPrice)} ${cur}</span>
+      </div>
+      <div style="font-size:13px; color:#6b7280; margin-top:6px;">
+        <span><i class="fas fa-phone"></i> ${escapeHtml(o.phone || '')}</span> | <span><i class="fas fa-map-marker-alt"></i> ${escapeHtml(shortAddr)}</span>
+      </div>
+      <div style="font-size:11px; color:#9ca3af; margin-top:4px;"><i class="fas fa-check-circle"></i> ${escapeHtml(o.confirmedBy || 'Admin')} | ${date}</div>`;
+    card.addEventListener('click', () => openOrderDetailModal(o, 'confirmed', key));
+    c.appendChild(card);
+  });
+}
+
+function openOrderDetailModal(order, type, key) {
+  const content = $("orderDetailContent");
+  const cur = curLbl();
+  let itemsHtml = '';
+  (order.items || []).forEach((it, idx) => {
+    const qty = Number(it.quantity || 0), price = Number(it.price || 0);
+    itemsHtml += `<tr><td style="text-align:center;padding:6px;">${idx + 1}</td><td style="text-align:right;font-weight:600;">${escapeHtml(it.name)}</td><td style="text-align:center;">${qty}</td><td style="text-align:right;">${fmt(price)}</td><td style="text-align:right;">${fmt(qty * price)}</td></tr>`;
+  });
+  const isWa = type === 'whatsapp';
+  const statusLabel = isWa ? t('orderIncoming') : t('orderConfirmed');
+  const statusColor = isWa ? '#25D366' : '#f39c12';
+  const actions = isWa
+    ? `<button class="btn-success" data-act="confirm" style="flex:1;"><i class="fas fa-check"></i> ${t('actionConfirmPrint')}</button><button class="btn-danger" data-act="del-wa" style="flex:1;"><i class="fas fa-trash"></i> ${t('actionDelete')}</button>`
+    : `<button style="background:var(--warning);color:white;border:none;padding:10px 20px;border-radius:40px;cursor:pointer;font-weight:600;flex:1;font-family:var(--font);" data-act="print"><i class="fas fa-print"></i> ${t('actionPrint')}</button><button class="btn-danger" data-act="del-conf" style="flex:1;"><i class="fas fa-trash"></i> ${t('actionDelete')}</button>`;
+  let shippingRow = '';
+  if (order.shippingCost !== undefined && order.shippingCost !== null && order.shippingCost > 0) {
+    shippingRow = `<div style="background:#fff7ed;padding:10px;border-radius:10px;margin-bottom:12px;font-size:12px;color:#9a3412;border:1px solid #fed7aa;"><strong>${t('shippingLabel')}</strong> ${fmt(order.shippingCost)} ${cur}${order.wilaya ? ` — 📍 ${escapeHtml(order.wilaya)}` : ''}${order.deliveryType ? ` — ${escapeHtml(order.deliveryType)}` : ''}</div>`;
+  }
+  const sourceInfo = order.source === 'landing' ? `<span class="landing-source-badge"><i class="fas fa-rocket"></i> ${t('promotionSourceBadge')}</span>` : '';
+  content.innerHTML = `
+    <h3 style="color:${statusColor};">${statusLabel} ${sourceInfo}</h3>
+    <div style="display:flex; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+      <span style="background:${statusColor}; color:white; padding:4px 16px; border-radius:30px; font-weight:600;">${fmt(order.totalPrice)} ${cur}</span>
+    </div>
+    <div style="background:#f8fafc; padding:12px; border-radius:16px; margin-bottom:12px; display:grid; gap:6px; font-size:13px;">
+      <div><strong>${t('customerLabel')}</strong> ${escapeHtml(order.customerName || '')}</div>
+      <div><strong>${t('phoneLabel')}</strong> ${escapeHtml(order.phone || '')}</div>
+      <div><strong>${t('addressLabel')}</strong> ${escapeHtml(order.address || '')}</div>
+    </div>
+    ${shippingRow}
+    <div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:13px;">
+      <thead><tr style="background:#f1f5f9;"><th style="padding:8px;">#</th><th style="padding:8px;">${t('productLabel').replace(':','')}</th><th style="padding:8px;">${t('qtyLabel') || 'الكمية'}</th><th style="padding:8px;">${t('priceField').replace(' (دج)','').replace(' (DA)','')}</th><th style="padding:8px;">${t('totalLabel').replace(':','')}</th></tr></thead>
+      <tbody>${itemsHtml || '<tr><td colspan="5" style="text-align:center;padding:12px;">---</td></tr>'}</tbody>
+      <tfoot><tr style="font-weight:700;background:#f8fafc;"><td colspan="5" style="text-align:right;padding:8px;color:#10b981;">${t('totalLabel')} ${fmt(order.totalPrice)} ${cur}</td></tr></tfoot>
+    </table></div>
+    <div style="display:flex; gap:10px; margin-top:16px; padding-top:16px; border-top:1px solid #e5e7eb; flex-wrap:wrap;">${actions}</div>`;
+  content.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', async () => {
+    const act = btn.dataset.act;
+    if (act === 'confirm') { const confirmed = await confirmOrderOnly(key, order); printContext = { key, order: confirmed, type: 'confirmed' }; openModal('printOptionModal'); closeModal('orderDetailModal'); }
+    else if (act === 'del-wa') { if (confirm(t('confirmDelete'))) { await remove(ref(db, `whatsappOrders/${key}`)); showToast("✅"); closeModal('orderDetailModal'); } }
+    else if (act === 'print') { printContext = { key, order, type: 'confirmed' }; openModal('printOptionModal'); }
+    else if (act === 'del-conf') { if (confirm(t('confirmDelete'))) { await remove(ref(db, `confirmedOrders/${key}`)); showToast("✅"); closeModal('orderDetailModal'); } }
+  }));
+  openModal("orderDetailModal");
+}
+
+async function getNextInvoiceNumber() {
+  const snap = await get(invoiceCounterRef);
+  const cur = snap.exists() ? snap.val() : 0;
+  const next = cur + 1;
+  await set(invoiceCounterRef, next);
+  return next;
+}
+async function confirmOrderOnly(key, order) {
+  const user = localStorage.getItem("user") || "Admin";
+  order.invoiceNumber = await getNextInvoiceNumber();
+  order.confirmedAt = Date.now();
+  order.confirmedBy = user;
+  await set(ref(db, `confirmedOrders/${key}`), order);
+  await remove(ref(db, `whatsappOrders/${key}`));
+  showToast(t('orderConfirmedMsg'));
+  return order;
+}
+
+$("thermalPrintBtn").addEventListener('click', () => { sessionStorage.setItem('printOrder', JSON.stringify(printContext)); window.open('print_invoice.html', '_blank'); closeModal('printOptionModal'); });
+$("normalPrintBtn").addEventListener('click', () => { sessionStorage.setItem('printOrder', JSON.stringify(printContext)); window.open('print_admin.html', '_blank'); closeModal('printOptionModal'); });
+$("deleteAllConfirmedBtn").addEventListener('click', async () => { if (confirm(t('confirmDeleteAll'))) { await remove(confirmedRef); showToast("✅"); } });
+
+/* ═══ Users ═══ */
+async function loadUsersList() {
+  const div = $("usersList"); if (!div) return;
+  div.innerHTML = "";
+  const oSnap = await get(ref(db, "users/owner"));
+  if (oSnap.exists()) Object.entries(oSnap.val()).forEach(([name]) => {
+    div.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;padding:8px;background:#f0fdf4;border-radius:12px;"><span><strong>${escapeHtml(name)}</strong> <span style="color:#10b981;">(${t('ownerLabel')})</span></span><button disabled style="background:#ccc;padding:4px 12px;border-radius:20px;border:none;color:#666;">${t('cannotDeleteOwner')}</button></div>`;
+  });
+  const aSnap = await get(ref(db, "users/admins"));
+  if (aSnap.exists()) Object.entries(aSnap.val()).forEach(([name]) => {
+    div.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;padding:8px;background:#fff;border-radius:12px;"><span><strong>${escapeHtml(name)}</strong> <span style="color:#f39c12;">(${t('adminLabel')})</span></span><button data-user="${escapeHtml(name)}" data-role="admin" style="background:#e74c3c;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;">${t('confirmDeleteUser')}</button></div>`;
+  });
+  const sSnap = await get(ref(db, "users/sellers"));
+  if (sSnap.exists()) Object.entries(sSnap.val()).forEach(([name]) => {
+    div.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;padding:8px;background:#fff;border-radius:12px;"><span><strong>${escapeHtml(name)}</strong> <span style="color:#3498db;">(${t('sellerLabel')})</span></span><button data-user="${escapeHtml(name)}" data-role="seller" style="background:#e74c3c;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;">${t('confirmDeleteUser')}</button></div>`;
+  });
+  if (!div.innerHTML) div.innerHTML = `<p style='text-align:center;color:#94a3b8;'>${t('noUsers')}</p>`;
+  div.querySelectorAll('[data-user]').forEach(b => b.addEventListener('click', () => deleteUser(b.dataset.user, b.dataset.role)));
+}
+async function deleteUser(name, role) {
+  if (!confirm(`${t('confirmDeleteUser')} "${name}"؟`)) return;
+  const path = role === "admin" ? `users/admins/${name}` : `users/sellers/${name}`;
+  await remove(ref(db, path));
+  showToast("✅"); loadUsersList();
+}
+$("addUserBtn").addEventListener('click', async () => {
+  const name = $("newUserName").value.trim(), pass = $("newUserPass").value.trim();
+  const isA = $("isAdminCheck").checked;
+  if (!name || !pass) return showToast(t('fillFields'));
+  if (name.length < 2) return showToast(t('userShortName'));
+  const path = isA ? "users/admins" : "users/sellers";
+  try {
+    await set(ref(db, `${path}/${name}`), { password: pass, role: isA ? "admin" : "seller", createdAt: Date.now() });
+    showToast(t('userAdded'));
+    $("newUserName").value = ""; $("newUserPass").value = ""; $("isAdminCheck").checked = false;
+    loadUsersList();
+  } catch (e) {
+    showToast(t('userAddFailed') + e.message);
+  }
+});
+$("btnUsers").addEventListener('click', () => {
+  if (!isOwner()) return showToast(t('notAllowedOwner'));
+  loadUsersList();
+  openModal("usersModal");
+});
+
+/* ═══ Store Settings ═══ */
+$("btnStoreSettings").addEventListener('click', () => {
+  if (!isOwner()) return showToast(t('notAllowed'));
+  currentStoreLogo = storeInfo.logoUrl || "";
+  renderStoreLogo();
+  openModal("storeSettingsModal");
+});
+
+function renderStoreLogo() {
+  const preview = $("storeLogoPreview");
+  const empty = $("storeLogoEmpty");
+  if (currentStoreLogo) {
+    preview.src = currentStoreLogo;
+    preview.style.display = "block";
+    empty.style.display = "none";
+  } else {
+    preview.src = "";
+    preview.style.display = "none";
+    empty.style.display = "flex";
+  }
+}
+
+async function handleStoreLogoFile(file) {
+  if (!file) return;
+  if (!imgbbKey) { showToast(t('fillImgbb')); return; }
+  showToast(t('uploadingLogo'));
+  try {
+    const up = await uploadImage(file);
+    currentStoreLogo = up.url;
+    renderStoreLogo();
+    showToast(t('logoStoreUploaded'));
+  } catch (e) { showToast("❌ " + e.message); }
+}
+
+$("btnStoreLogoGallery").addEventListener('click', () => $("storeLogoFile").click());
+$("btnStoreLogoCamera").addEventListener('click', () => $("storeLogoCamera").click());
+$("storeLogoFile").addEventListener('change', e => {
+  handleStoreLogoFile(e.target.files[0]);
+  e.target.value = "";
+});
+$("storeLogoCamera").addEventListener('change', e => {
+  handleStoreLogoFile(e.target.files[0]);
+  e.target.value = "";
+});
+$("btnStoreLogoRemove").addEventListener('click', () => {
+  if (!currentStoreLogo) return showToast(t('noLogoMsg'));
+  if (!confirm(t('confirmDeleteStoreLogo'))) return;
+  currentStoreLogo = "";
+  renderStoreLogo();
+  showToast(t('logoStoreRemoved'));
+});
+
+$("saveStoreSettingsBtn").addEventListener('click', async () => {
+  const data = {
+    name: $("setStoreName").value.trim(),
+    logoUrl: currentStoreLogo || "",
+    phoneInvoice: $("setPhone").value.trim(),
+    address: $("setAddress").value.trim(),
+    whatsappNumber: normalizeWhatsappNumber($("setWhatsapp").value.trim()),
+    currency: $("setCurrency").value.trim() || "دج",
+    enableWhatsapp: $("setEnableWhatsapp").checked,
+    enableLocation: $("setEnableLocation").checked
+  };
+  if (!data.name) return showToast(t('storeNameRequired'));
+  const imgbb = $("setImgbb").value.trim();
+  try {
+    await set(ref(db, "store/info"), data);
+    if (imgbb) await set(ref(db, "store/settings"), { imgbbApiKey: imgbb });
+    $("setWhatsapp").value = data.whatsappNumber;
+    showToast(t('storeSavedWithPhone') + data.whatsappNumber);
+    closeModal("storeSettingsModal");
+  } catch (e) { showToast(t('saveFailed')); }
+});
+
+/* ═══ Owner ═══ */
+$("btnOwnerSettings").addEventListener('click', () => { if (!isOwner()) return showToast(t('notAllowed')); openModal("ownerModal"); });
+$("saveOwnerBtn").addEventListener('click', async () => {
+  const nn = $("newOwnerName").value.trim(), np = $("newOwnerPass").value.trim();
+  if (!nn || !np) return showToast(t('fillFields'));
+  const cur = localStorage.getItem("user");
+  await set(ref(db, `users/owner/${nn}`), { password: np, role: "owner" });
+  if (nn !== cur) await remove(ref(db, `users/owner/${cur}`));
+  localStorage.setItem("user", nn);
+  showToast("✅"); closeModal("ownerModal");
+});
+
+/* ═══ Wholesale ═══ */
+$("btnWholesaleCode").addEventListener('click', () => { if (!isOwner()) return showToast(t('notAllowed')); $("wholesaleCodeInput").value = wholesaleCode || ""; openModal("wholesaleCodeModal"); });
+$("saveWholesaleCodeBtn").addEventListener('click', async () => {
+  const c = $("wholesaleCodeInput").value.trim();
+  if (!c) return showToast(t('fillFields'));
+  await set(ref(db, "store/wholesaleCode"), { code: c });
+  showToast("✅"); closeModal("wholesaleCodeModal");
+});
+
+/* ═══ Setup ═══ */
+$("btnSetup").addEventListener('click', () => {
+  if (!isOwner()) return showToast(t('notAllowedOwner'));
+  window.open('setup.html', '_blank');
+  $("dropdownMenu").style.display = "none";
+});
+
+/* ═══ Cover ═══ */
+$("btnCover").addEventListener('click', () => $("coverFileInput").click());
+$("coverFileInput").addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  showToast(t('processing'));
+  try { const up = await uploadImage(f); await set(ref(db, "store/cover"), { url: up.url, deleteUrl: up.deleteUrl }); showToast("✅"); } catch (err) { showToast("❌ " + err.message); }
+});
+
+/* ═══ Delete All ═══ */
+$("btnDeleteAllProducts").addEventListener('click', async () => {
+  if (!isOwner()) return showToast(t('notAllowed'));
+  if (confirm(t('confirmDeleteAll'))) { await remove(productsRef); await remove(discountsRef); showToast("✅"); }
+});
+
+/* ═══ Excel ═══ */
+$("btnExcelImport").addEventListener('click', () => $("excelFileInput").click());
+$("excelFileInput").addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  showToast(t('processing'));
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    try {
+      const data = new Uint8Array(ev.target.result);
+      const wb = window.XLSX.read(data, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = window.XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+      if (!rows.length) return showToast("❌");
+      let hIdx = -1;
+      for (let j = 0; j < Math.min(10, rows.length); j++) {
+        const s = rows[j].map(c => String(c).toLowerCase()).join(" ");
+        if (s.includes("désignation") || s.includes("code") || s.includes("اسم")) { hIdx = j; break; }
+      }
+      if (hIdx === -1) return alert("❌");
+      const headers = rows[hIdx];
+      const norm = h => String(h).trim().toLowerCase();
+      const codeI = headers.findIndex(h => norm(h) === "code produit" || norm(h) === "code");
+      const nameI = headers.findIndex(h => norm(h) === "désignation" || norm(h) === "designation" || norm(h) === "اسم المنتج");
+      const retailI = headers.findIndex(h => norm(h).includes("prix 2") || norm(h) === "prix");
+      const wholeI = headers.findIndex(h => norm(h) === "pa ttc" || norm(h) === "pa" || norm(h).includes("جملة"));
+      const famI = headers.findIndex(h => norm(h) === "famille" || norm(h) === "عائلة");
+      const parseP = v => !v ? 0 : (typeof v === 'number' ? v : Number(String(v).replace(/,/g, '.').replace(/[^0-9.-]/g, '')) || 0);
+      let count = 0;
+      for (let i = hIdx + 1; i < rows.length; i++) {
+        const r = rows[i]; if (!r || !r.length) continue;
+        const serial = String(r[codeI] || "").trim();
+        const name = String(r[nameI] || "").trim();
+        if (!name) continue;
+        const retail = retailI !== -1 ? parseP(r[retailI]) : 0;
+        const wholesale = wholeI !== -1 ? parseP(r[wholeI]) : 0;
+        const fam = famI !== -1 ? String(r[famI] || "").trim() : "";
+        const ex = Object.entries(allProducts).find(([, p]) => String(p.serial || "").trim() === serial);
+        const pData = { serial, name, price: retail, wholesalePrice: wholesale, family: fam || (ex?.[1]?.family || ""), quantityPerBox: ex?.[1]?.quantityPerBox || null, imageUrl: ex?.[1]?.imageUrl || "", hidden: ex?.[1]?.hidden || false };
+        if (ex?.[1]?.landing) pData.landing = ex[1].landing;
+        if (ex) await update(ref(db, "products/" + ex[0]), pData);
+        else await push(productsRef, pData);
+        count++;
+      }
+      showToast(`✅ ${count}`);
+      e.target.value = "";
+    } catch (err) { alert("خطأ:\n" + err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+/* ═══ Tabs ═══ */
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    const n = tab.dataset.tab;
+    ["products", "landing", "discounts", "hidden", "reviews", "whatsapp", "confirmed"].forEach(s => {
+      const sec = $(s + "Section");
+      if (sec) sec.classList.toggle('show', s === n);
+    });
+    if (n === "hidden") renderHidden();
+    if (n === "discounts") renderDiscountsList();
+    if (n === "landing") renderLandingList();
+    if (n === "reviews") renderReviewsSection();
+    if (n === "whatsapp") { isWhatsappTabOpen = true; lastSeenCount = currentOrderCount; localStorage.setItem('lastSeenOrderCount', lastSeenCount); newOrdersCount = 0; updateNotificationBadge(); }
+    else { isWhatsappTabOpen = false; newOrdersCount = currentOrderCount > lastSeenCount ? currentOrderCount - lastSeenCount : 0; updateNotificationBadge(); }
+  });
+});
+
+/* ═══ Menu ═══ */
+$("menuToggleBtn").addEventListener('click', e => { e.stopPropagation(); $("dropdownMenu").style.display = $("dropdownMenu").style.display === "block" ? "none" : "block"; });
+document.addEventListener('click', e => {
+  const d = $("dropdownMenu"), m = $("menuToggleBtn");
+  if (m && d && !m.contains(e.target) && !d.contains(e.target)) d.style.display = "none";
+});
+
+/* ═══ Language Toggle ═══ */
+$("langToggleBtn").addEventListener('click', () => window.toggleLang());
+
+/* ═══ Login ═══ */
+$("loginBtn").addEventListener('click', async () => {
+  const u = $("adminUser").value.trim(), p = $("adminPassword").value.trim();
+  if (!u || !p) return alert(t('enterLoginData'));
+  for (const role of ["owner", "admins", "sellers"]) {
+    const snap = await get(ref(db, `users/${role}/${u}`));
+    if (snap.exists() && snap.val().password === p) {
+      localStorage.setItem("auth", "true"); localStorage.setItem("user", u);
+      localStorage.setItem("role", role === "owner" ? "owner" : (role === "admins" ? "admin" : "seller"));
+      initApp(); return;
+    }
+  }
+  alert(t('wrongLoginData'));
+});
+$("adminPassword").addEventListener('keydown', e => { if (e.key === 'Enter') $("loginBtn").click(); });
+$("btnLogout").addEventListener('click', () => { localStorage.clear(); location.reload(); });
+
+function initApp() {
+  $("loginModal").classList.remove('show');
+  $("userNameDisplay").innerHTML = `<i class="fas fa-user-circle"></i> ${localStorage.getItem("user")} (${getRole()})`;
+  updateMenuPermissions(); loadUsersList();
+  if (getRole() === "seller") {
+    const ht = document.querySelector('.tab[data-tab="hidden"]'); if (ht) ht.style.display = "none";
+    const lt = document.querySelector('.tab[data-tab="landing"]'); if (lt) lt.style.display = "none";
+    const dt = document.querySelector('.tab[data-tab="discounts"]'); if (dt) dt.style.display = "none";
+  }
+}
+function bootApp() {
+  $("loadingScreen").style.display = "none";
+  $("appContainer").style.display = "block";
+  if (localStorage.getItem("auth") === "true") initApp();
+}
+</script>
+</body>
+</html>

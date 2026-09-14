@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facture</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',Arial,sans-serif;font-size:12px;background:#fff;padding:10px;direction:ltr}
+html[dir="rtl"] body{direction:rtl}
+.invoice{max-width:1000px;margin:0 auto;border:2px solid #000;padding:12px}
+.top-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:15px}
+.store-info{display:flex;align-items:center;gap:10px;width:55%}
+.store-logo img{width:50px;height:50px;object-fit:contain}
+.store-details h2{font-size:14px;font-weight:900;margin-bottom:3px}
+.store-details p{font-size:10px;margin:2px 0}
+.client-info{width:40%;border:1px solid #000;padding:6px 10px;line-height:1.4;font-size:11px;direction:ltr}
+html[dir="rtl"] .client-info{direction:rtl}
+.client-info p{margin:2px 0;text-align:left}
+html[dir="rtl"] .client-info p{text-align:right}
+.info-bar{display:flex;justify-content:space-between;margin-bottom:15px;padding:5px 0;font-size:11px;font-weight:600;direction:ltr}
+html[dir="rtl"] .info-bar{direction:rtl}
+table{width:100%;border-collapse:collapse;margin:10px 0;direction:ltr}
+html[dir="rtl"] table{direction:rtl}
+th,td{border:1px solid #000;padding:2px 4px;font-size:11px}
+th{background:#f4f4f4;font-weight:700;text-align:center}
+.summary-line{margin:8px 0;text-align:right;font-weight:600;font-size:11px;direction:ltr}
+html[dir="rtl"] .summary-line{text-align:left;direction:rtl}
+.bottom-section{display:flex;justify-content:space-between;align-items:flex-end;margin-top:15px;border-top:2px solid #000;padding-top:10px;direction:ltr}
+html[dir="rtl"] .bottom-section{direction:rtl}
+.invoice-number{text-align:right;font-size:11px;font-weight:bold}
+html[dir="rtl"] .invoice-number{text-align:left}
+.total-box{text-align:right}
+html[dir="rtl"] .total-box{text-align:left}
+.total-box strong{font-size:12px}
+.total-amount{font-size:16px;font-weight:900}
+.footer-text{text-align:center;margin-top:12px;font-size:10px;font-weight:500;direction:ltr}
+html[dir="rtl"] .footer-text{direction:rtl}
+.doc-title{text-align:center;margin:10px 0;font-weight:bold;font-size:14px;direction:ltr}
+html[dir="rtl"] .doc-title{direction:rtl}
+@media print{
+  body{padding:0}
+  .invoice{border:2px solid #000}
+  .no-print{display:none!important}
+}
+td:nth-child(2){direction:ltr;text-align:left;font-weight:600}
+html[dir="rtl"] td:nth-child(2){text-align:right}
+td:nth-child(4),td:nth-child(5){direction:ltr;text-align:right}
+#loading{text-align:center;padding:60px;color:#0b6e4f;font-weight:700;font-family:'Cairo',sans-serif}
+#loading .spin{width:40px;height:40px;border:4px solid #e9edf2;border-top-color:#0b6e4f;border-radius:50%;animation:spin .9s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#notice{text-align:center;padding:60px;color:#e74c3c;font-weight:700;font-family:'Cairo',sans-serif}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spin"></div><span id="loadingText">Chargement...</span></div>
+<div id="notice" style="display:none"></div>
+<div id="invoiceContainer" style="display:none"></div>
+
+<div class="no-print" style="text-align:center;margin:20px 0;" id="actionButtons">
+  <button onclick="window.print()" style="padding:10px 25px;font-size:14px;margin:5px;background:#000;color:white;border:none;border-radius:5px;cursor:pointer;font-family:'Cairo',sans-serif;" id="printBtn">🖨️ Imprimer</button>
+  <button onclick="window.close()" style="padding:10px 25px;font-size:14px;margin:5px;background:#e5e7eb;border:none;border-radius:5px;cursor:pointer;font-family:'Cairo',sans-serif;" id="closeBtn">✖️ Fermer</button>
+</div>
+
+<!-- ═══════════════ 🌐 نظام الترجمة — يقرأ نفس متغير الأدمن ═══════════════ -->
+<script>
+const INV_I18N = {
+  fr: {
+    htmlLang: "fr",
+    dir: "ltr",
+    title: "Facture",
+    loading: "Chargement...",
+    print: "🖨️ Imprimer",
+    close: "✖️ Fermer",
+    client: "Client :",
+    address: "Adresse :",
+    phone: "Télé :",
+    preparedBy: "Préparé par :",
+    docTitleConfirmed: "Bon de livraison (Confirmé)",
+    docTitle: "Bon de livraison",
+    colNum: "N°",
+    colDesignation: "DESIGNATION",
+    colQty: "QTE",
+    colPrice: "Prix u",
+    colTotal: "Total",
+    noProducts: "Aucun produit",
+    nbreProduit: "Nbre Produit",
+    totQty: "Tot Qté",
+    invoiceNumPrefix: "bon de livraison N°:",
+    netToPay: "net à payer",
+    thankYou: "Merci pour votre confiance",
+    errConfig: "⚠️ Fichier config.js manquant ou non configuré",
+    errNoData: "⚠️ Aucune donnée à imprimer",
+    errNoDataHint: "Ouvrez cette page depuis le panneau d'administration",
+    errOrderData: "Erreur dans les données de commande",
+    timePrefix: "le"
+  },
+  ar: {
+    htmlLang: "ar",
+    dir: "rtl",
+    title: "فاتورة",
+    loading: "جاري التحميل...",
+    print: "🖨️ طباعة",
+    close: "✖️ إغلاق",
+    client: "العميل:",
+    address: "العنوان:",
+    phone: "الهاتف:",
+    preparedBy: "أعدّه:",
+    docTitleConfirmed: "وصل التسليم (مؤكد)",
+    docTitle: "وصل التسليم",
+    colNum: "رقم",
+    colDesignation: "المنتج",
+    colQty: "الكمية",
+    colPrice: "السعر",
+    colTotal: "المجموع",
+    noProducts: "لا توجد منتجات",
+    nbreProduit: "عدد المنتجات",
+    totQty: "مجموع الكمية",
+    invoiceNumPrefix: "وصل التسليم رقم:",
+    netToPay: "المبلغ الإجمالي",
+    thankYou: "شكراً لثقتكم",
+    errConfig: "⚠️ ملف config.js مفقود أو غير معد",
+    errNoData: "⚠️ لا توجد بيانات للطباعة",
+    errNoDataHint: "افتح هذه الصفحة من لوحة الإدارة",
+    errOrderData: "خطأ في بيانات الطلب",
+    timePrefix: "بتاريخ"
+  }
+};
+
+/* ✅ نقرأ نفس متغير اللغة الذي تستخدمه لوحة الإدارة */
+let INV_LANG = localStorage.getItem('store_lang') || 'fr';
+
+function T(key) {
+  return (INV_I18N[INV_LANG] && INV_I18N[INV_LANG][key]) || INV_I18N.fr[key] || key;
+}
+window.T = T;
+window.INV_LANG = INV_LANG;
+
+/* تطبيق اللغة على الصفحة */
+function applyInvoiceLang() {
+  const t = INV_I18N[INV_LANG];
+  document.documentElement.lang = t.htmlLang;
+  document.documentElement.dir = t.dir;
+  document.body.dir = t.dir;
+
+  const lt = document.getElementById('loadingText');
+  if (lt) lt.textContent = t.loading;
+  const pb = document.getElementById('printBtn');
+  if (pb) pb.textContent = t.print;
+  const cb = document.getElementById('closeBtn');
+  if (cb) cb.textContent = t.close;
+}
+
+applyInvoiceLang();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+const $ = id => document.getElementById(id);
+const BOOT = window.STORE_BOOTSTRAP;
+
+if (!BOOT || !BOOT.firebaseConfig || String(BOOT.firebaseConfig.apiKey).includes("YOUR_")) {
+  $("loading").style.display = "none";
+  $("notice").style.display = "block";
+  $("notice").innerHTML = window.T('errConfig');
+  throw new Error("no config");
+}
+
+const app = initializeApp(BOOT.firebaseConfig);
+const db = getDatabase(app);
+
+function esc(s){return !s?'':String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function fmt(n){return Math.floor(Number(n||0)).toLocaleString('fr-FR');}
+function fmtDec(n){return Number(n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+/* ✅ عرض العملة حسب اللغة */
+function curLabel(c) {
+  const currency = c || 'دج';
+  if (window.INV_LANG === 'fr' && (currency === 'دج' || currency === 'DZD' || currency === 'دينار')) return 'DA';
+  return currency;
+}
+
+async function init(){
+  let storeInfo = {
+    name: "",
+    logoUrl: "",
+    phoneInvoice: "",
+    address: "",
+    currency: "دج"
+  };
+  try{
+    const snap = await get(ref(db, 'store/info'));
+    if (snap.exists()) {
+      const d = snap.val();
+      storeInfo = {
+        name: d.name || "",
+        logoUrl: d.logoUrl || "",
+        phoneInvoice: d.phoneInvoice || "",
+        address: d.address || "",
+        currency: d.currency || "دج"
+      };
+    }
+  } catch(e){ console.warn(e); }
+
+  document.title = storeInfo.name ? (window.T('title') + " - " + storeInfo.name) : window.T('title');
+
+  const stored = sessionStorage.getItem('printOrder');
+  if (!stored) {
+    $("loading").style.display = "none";
+    $("notice").style.display = "block";
+    $("notice").innerHTML = window.T('errNoData') + "<br><small>" + window.T('errNoDataHint') + "</small>";
+    if ($("actionButtons")) $("actionButtons").style.display = "none";
+    return;
+  }
+
+  let data;
+  try { data = JSON.parse(stored); }
+  catch(e){
+    $("loading").style.display = "none";
+    $("notice").style.display = "block";
+    $("notice").textContent = window.T('errOrderData');
+    return;
+  }
+  sessionStorage.removeItem('printOrder');
+
+  const order = data.order || data;
+  const type = data.type || 'confirmed';
+  renderInvoice(order, type, storeInfo);
+}
+
+function renderInvoice(order, type, storeInfo){
+  const container = $("invoiceContainer");
+  const isConfirmed = (type === 'confirmed');
+  const invNum = order.invoiceNumber ? String(order.invoiceNumber).padStart(4, '0') : '----';
+  const cur = curLabel(storeInfo.currency);
+
+  /* ═══ بناء صفوف الجدول ═══ */
+  let rows = '';
+  let totalQte = 0;
+  let itemIndex = 1;
+
+  if (order.items && Array.isArray(order.items)) {
+    order.items.forEach((it) => {
+      const qty = Number(it.quantity || 0);
+      const price = Number(it.price || 0);
+      const total = qty * price;
+      totalQte += qty;
+      rows += `
+        <tr>
+          <td style="text-align:center;border:1px solid #000;padding:2px 4px;">${itemIndex}</td>
+          <td style="border:1px solid #000;padding:2px 4px;text-align:left;direction:ltr;font-weight:600;">${esc(it.name)}</td>
+          <td style="text-align:center;border:1px solid #000;padding:2px 4px;">${qty}</td>
+          <td style="text-align:right;border:1px solid #000;padding:2px 4px;direction:ltr;">${fmt(price)} ${esc(cur)}</td>
+          <td style="text-align:right;border:1px solid #000;padding:2px 4px;direction:ltr;">${fmt(total)} ${esc(cur)}</td>
+        </tr>
+      `;
+      itemIndex++;
+    });
+  }
+
+  const totalPrice = order.totalPrice || 0;
+  const nbreProduit = order.items ? order.items.length : 0;
+  const sellerName = order.confirmedBy || 'Admin';
+  const now = new Date(order.confirmedAt || Date.now());
+  const dateStr = now.toLocaleDateString('fr-FR');
+  const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  const logoHtml = storeInfo.logoUrl
+    ? `<div class="store-logo"><img src="${esc(storeInfo.logoUrl)}" alt="Logo" onerror="this.style.display='none'"></div>`
+    : '';
+
+  const phoneHtml = storeInfo.phoneInvoice ? `<p>${window.T('phone')} ${esc(storeInfo.phoneInvoice)}</p>` : '';
+  const addressHtml = storeInfo.address ? `<p>${esc(storeInfo.address)}</p>` : '';
+
+  const docTitle = isConfirmed ? window.T('docTitleConfirmed') : window.T('docTitle');
+
+  container.innerHTML = `
+    <div class="invoice">
+      <!-- Header -->
+      <div class="top-header">
+        <div class="store-info">
+          ${logoHtml}
+          <div class="store-details">
+            <h2>${esc(storeInfo.name) || '—'}</h2>
+            ${phoneHtml}
+            ${addressHtml}
+          </div>
+        </div>
+        <div class="client-info">
+          <p><strong>${window.T('client')}</strong> ${esc(order.customerName || '')}</p>
+          <p><strong>${window.T('address')}</strong> ${esc((order.address || '').split('http')[0].trim())}</p>
+          <p><strong>${window.T('phone')}</strong> ${esc(order.phone || '')}</p>
+        </div>
+      </div>
+
+      <!-- Info Bar -->
+      <div class="info-bar">
+        <span>${window.T('timePrefix')} ${dateStr} - ${timeStr}</span>
+        <span>${window.T('preparedBy')} ${esc(sellerName)}</span>
+      </div>
+
+      <!-- Title -->
+      <div class="doc-title">${docTitle}</div>
+
+      <!-- Table -->
+      <table>
+        <thead>
+          <tr>
+            <th style="width:5%">${window.T('colNum')}</th>
+            <th style="width:55%">${window.T('colDesignation')}</th>
+            <th style="width:8%">${window.T('colQty')}</th>
+            <th style="width:16%">${window.T('colPrice')}</th>
+            <th style="width:16%">${window.T('colTotal')}</th>
+          </tr>
+        </thead>
+        <tbody>${rows || `<tr><td colspan="5" style="text-align:center;padding:10px;">${window.T('noProducts')}</td></tr>`}</tbody>
+      </table>
+
+      <!-- Summary -->
+      <div class="summary-line">${window.T('nbreProduit')} : ${nbreProduit} &nbsp;&nbsp;&nbsp; ${window.T('totQty')} : ${totalQte}</div>
+
+      <!-- Bottom -->
+      <div class="bottom-section">
+        <div class="invoice-number">${window.T('invoiceNumPrefix')} ${invNum}</div>
+        <div class="total-box">
+          <div><strong>${window.T('netToPay')}</strong></div>
+          <div class="total-amount">${fmtDec(totalPrice)} ${esc(cur)}</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer-text">${window.T('thankYou')}</div>
+    </div>
+  `;
+
+  $("loading").style.display = "none";
+  container.style.display = "block";
+}
+
+init();
+</script>
+</body>
+</html>

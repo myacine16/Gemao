@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+<title>...</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --primary:#0b6e4f;--primary-light:#1a8a6a;--primary-dark:#064e3b;
+  --vip:#8e44ad;--vip-light:#f4ecf9;--danger:#e74c3c;--warning:#f39c12;
+  --bg:#f8fafc;--card-bg:#fff;--text:#0f172a;--text-muted:#64748b;--border:#e9edf2;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.04);--shadow-md:0 8px 24px rgba(0,0,0,.06);
+  --shadow-lg:0 16px 40px rgba(0,0,0,.08);--radius:18px;--radius-sm:12px;
+  --transition:.25s cubic-bezier(.4,0,.2,1);--font:'Cairo',system-ui,sans-serif
+}
+html,body{min-height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl;text-align:right;min-height:100vh;padding-bottom:90px}
+body.wholesale-active{background:var(--vip-light)}
+body.wholesale-active .current-price{color:var(--vip)!important}
+
+#loadingScreen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);color:var(--primary);font-weight:700;gap:16px;font-family:var(--font)}
+#loadingScreen .spinner{width:44px;height:44px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#noticeScreen{position:fixed;inset:0;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);color:var(--text-muted);text-align:center;padding:40px;font-family:var(--font)}
+#noticeScreen .ico{font-size:64px;margin-bottom:16px}
+#noticeScreen h2{font-weight:800;color:#64748b;margin-bottom:8px;font-size:1.3rem}
+#noticeScreen p{font-size:.9rem;line-height:1.6;max-width:400px}
+#noticeScreen code{background:#f1f5f9;padding:2px 8px;border-radius:6px;font-family:monospace;color:#0b6e4f;font-size:.85rem}
+
+header{position:sticky;top:0;z-index:1100;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);box-shadow:0 1px 4px rgba(0,0,0,.04);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,0,0,.03)}
+.logo{display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:900;color:var(--primary-dark);cursor:pointer;user-select:none}
+.logo img{height:2.6rem;width:auto}
+.nav-icons{display:flex;align-items:center;gap:16px}
+.nav-icons i{font-size:1.3rem;color:var(--text-muted);cursor:pointer;transition:var(--transition)}
+.nav-icons i:hover{color:var(--primary);transform:scale(1.05)}
+.lang-btn{background:none;border:1.5px solid var(--border);border-radius:30px;padding:4px 12px;font-family:var(--font);font-size:.75rem;font-weight:700;color:var(--primary);cursor:pointer;display:flex;align-items:center;gap:5px;transition:.2s}
+.lang-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+#searchContainer{padding:12px 20px;background:#fff;border-bottom:1px solid var(--border);display:none}
+#searchContainer.active{display:block;animation:slideDown .25s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+#searchInput{width:100%;padding:12px 20px;border-radius:50px;border:1px solid var(--border);background:var(--bg);font-size:.95rem;font-family:inherit;outline:none}
+#searchInput:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(11,110,79,.12)}
+
+.banner{width:100%;background:#fff}
+#coverImage{width:100%;height:auto;max-height:260px;object-fit:cover;display:none}
+@media(min-width:768px){#coverImage{max-height:380px}}
+
+.categories-wrapper{background:#fff;padding:12px 16px 8px;border-bottom:1px solid var(--border);position:sticky;top:70px;z-index:1050;backdrop-filter:blur(8px);display:none}
+.categories-wrapper.show{display:block}
+.categories-bar{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:10px;padding-bottom:6px}
+.categories-bar::-webkit-scrollbar{height:3px}
+.categories-bar::-webkit-scrollbar-thumb{background:var(--primary);border-radius:10px}
+.cat-btn{flex-shrink:0;padding:8px 18px;border-radius:40px;border:1px solid transparent;background:var(--bg);font-weight:600;font-size:.8rem;color:var(--text-muted);cursor:pointer;transition:var(--transition);font-family:var(--font);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.cat-btn:hover{transform:translateY(-2px);background:#fff;box-shadow:var(--shadow-sm);border-color:var(--border)}
+.cat-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(11,110,79,.25);border-color:var(--primary)}
+.cat-btn .cat-count{background:rgba(255,255,255,.25);padding:0 8px;border-radius:30px;font-size:.65rem;font-weight:700}
+.cat-btn.discount-btn{background:var(--danger);color:#fff;border-color:var(--danger)}
+.cat-clear-btn{flex-shrink:0;padding:6px 14px;border-radius:40px;border:none;background:transparent;color:var(--danger);font-weight:600;font-size:.7rem;cursor:pointer;display:none;font-family:var(--font);align-items:center;gap:4px}
+.cat-clear-btn.show{display:inline-flex}
+
+.wholesale-box{background:linear-gradient(145deg,#fff,#fafcff);margin:12px 16px 8px;padding:16px 20px;border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.wholesale-box .info{display:flex;align-items:center;gap:14px}
+.wholesale-box .info .icon{width:44px;height:44px;background:linear-gradient(135deg,var(--vip),#9b59b6);border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
+.wholesale-box .info .text h3{font-size:.9rem;font-weight:800;margin-bottom:2px}
+.wholesale-box .info .text p{font-size:.7rem;color:var(--text-muted)}
+.wholesale-box .actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wholesale-box .actions input{padding:8px 14px;border:1px solid var(--border);border-radius:40px;background:var(--bg);font-family:var(--font);outline:none;min-width:120px;font-size:.85rem}
+.wholesale-box .actions button{padding:8px 20px;border:none;border-radius:40px;font-weight:700;font-size:.8rem;cursor:pointer;font-family:var(--font)}
+.btn-activate{background:linear-gradient(135deg,var(--vip),#9b59b6);color:#fff}
+.btn-deactivate{background:#eef2f6;color:var(--text-muted)}
+#wholesaleStatus{font-weight:700;font-size:.75rem;padding:4px 12px;border-radius:30px;background:var(--bg)}
+#wholesaleStatus.active{background:#d4edda;color:#155724}
+#wholesaleStatus.inactive{background:#f8d7da;color:#721c24}
+
+.products-container{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:16px}
+@media(min-width:640px){.products-container{grid-template-columns:repeat(3,1fr);gap:18px;padding:20px 24px}}
+@media(min-width:1024px){.products-container{grid-template-columns:repeat(4,1fr);gap:22px;padding:24px 32px}}
+@media(min-width:1400px){.products-container{grid-template-columns:repeat(5,1fr)}}
+.product-card{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;transition:var(--transition);box-shadow:var(--shadow-sm);border:1px solid var(--border);position:relative;display:flex;flex-direction:column}
+.product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--primary-light)}
+.product-card.on-sale{border-color:var(--danger);background:#fffaf5}
+.product-image-wrapper{position:relative;width:100%;padding-top:75%;background:#f1f5f9;overflow:hidden}
+.product-image-wrapper img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:pointer;transition:var(--transition)}
+.product-image-wrapper img:hover{transform:scale(1.02)}
+.promo-ribbon{position:absolute;bottom:0;right:0;left:0;background:rgba(220,38,38,.8);color:#fff;padding:4px 0;text-align:center;font-weight:800;font-size:11px;letter-spacing:1px;z-index:8;pointer-events:none}
+.sale-badge{position:absolute;top:10px;right:10px;background:var(--danger);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;z-index:10;border:2px solid rgba(255,255,255,.3)}
+.sale-badge.infinity{background:#2563eb}
+.product-info{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column;gap:4px}
+.product-info h3{font-size:.85rem;font-weight:700;line-height:1.4;height:2.4rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.product-price{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;font-size:1rem;font-weight:800;margin:2px 0}
+.product-price .current-price{color:var(--primary);font-size:1.1rem}
+.product-price .retail-price{font-size:.8rem;color:var(--text-muted);text-decoration:line-through}
+.product-price .discount-price{color:var(--danger);font-size:1.15rem}
+.product-price .discount-price .badge{font-size:.55rem;background:var(--danger);color:#fff;padding:1px 8px;border-radius:30px;margin-right:4px;font-weight:700}
+.product-price .wholesale-price{color:var(--vip);font-size:1.1rem}
+.product-price .wholesale-price .badge{font-size:.55rem;background:var(--vip);color:#fff;padding:1px 8px;border-radius:30px;margin-right:4px;font-weight:700}
+.product-family-tag{font-size:.65rem;color:var(--text-muted);background:var(--bg);padding:2px 10px;border-radius:30px;display:inline-block;align-self:flex-start}
+.product-box-qty{font-size:.65rem;color:#1e40af;background:#dbeafe;padding:2px 10px;border-radius:30px;display:inline-block;align-self:flex-start}
+.discount-timer{font-size:.7rem;color:var(--danger);font-weight:600;background:#fee2e2;padding:2px 10px;border-radius:30px;display:inline-block;direction:ltr;align-self:flex-start}
+.discount-timer.unlimited{background:#dbeafe;color:#2563eb}
+.qty-controls{display:flex;align-items:center;justify-content:space-between;background:var(--bg);padding:4px 6px 4px 4px;border-radius:50px;gap:2px;margin-top:6px;border:1px solid var(--border)}
+.qty-btn{width:32px;height:32px;border:none;border-radius:50%;background:#fff;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:var(--shadow-sm);transition:var(--transition)}
+.qty-btn:hover{background:var(--primary);color:#fff}
+.qty-input{width:48px;text-align:center;border:1px solid var(--border);border-radius:30px;padding:6px 0;background:#fff;font-family:var(--font);font-weight:600;font-size:.85rem;outline:none}
+.qty-label{font-size:.6rem;color:var(--text-muted);font-weight:600;margin-right:2px}
+.no-data{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--text-muted)}
+.no-data i{font-size:3rem;display:block;margin-bottom:12px;color:#d1d5db}
+
+#pagination{text-align:center;margin:12px 0 20px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+#pagination button{min-width:36px;height:36px;border:none;border-radius:var(--radius-sm);background:#fff;color:var(--text);font-weight:600;font-size:.85rem;box-shadow:var(--shadow-sm);cursor:pointer;font-family:var(--font)}
+#pagination button:hover:not(:disabled){background:var(--primary);color:#fff}
+#pagination .active-page{background:var(--primary);color:#fff}
+#pagination button:disabled{opacity:.4;cursor:default}
+
+#cartBtn{position:fixed;bottom:24px;left:24px;width:58px;height:58px;border-radius:30px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border:none;color:#fff;font-size:1.5rem;box-shadow:0 8px 24px rgba(11,110,79,.35);cursor:pointer;z-index:1050;display:none;align-items:center;justify-content:center}
+#cartBtn.show{display:flex}
+#cartBtn:hover{transform:scale(1.04)}
+#cartBadge{position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:30px;padding:2px 8px;font-size:.65rem;font-weight:700;min-width:20px;text-align:center;border:2px solid #fff}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(8px);z-index:2000;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-content{background:#fff;width:100%;max-width:480px;border-radius:28px;padding:24px 20px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+.modal-content h3{text-align:center;font-weight:800;margin-bottom:16px}
+.form-control{width:100%;padding:12px 16px;margin-bottom:12px;border:1px solid var(--border);border-radius:40px;font-family:var(--font);background:var(--bg);font-size:.9rem;outline:none}
+.form-control:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(11,110,79,.08)}
+.address-container{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.address-container input{flex:1;margin-bottom:0}
+.location-btn{background:#4285f4;color:#fff;border:none;border-radius:40px;padding:10px 16px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;white-space:nowrap;font-family:var(--font)}
+.location-btn:disabled{opacity:.6}
+.btn-order{width:100%;padding:14px;border:none;border-radius:40px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;font-weight:700;font-size:1rem;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-order:disabled{opacity:.5;cursor:not-allowed;background:#94a3b8}
+.clear-cart-btn{width:100%;margin-top:8px;background:var(--danger);color:#fff;border:none;padding:10px;border-radius:40px;font-weight:600;cursor:pointer;font-family:var(--font)}
+#cartItemsList{max-height:250px;overflow-y:auto;margin-bottom:12px}
+.cart-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+#cartTotal{font-weight:800;text-align:center;margin:10px 0 16px;font-size:1.1rem;color:var(--primary)}
+
+#imageModal .modal-content{background:transparent;box-shadow:none;max-width:90%;padding:0;display:flex;justify-content:center;align-items:center}
+#modalImg{max-width:95%;max-height:80vh;border-radius:20px}
+
+footer{text-align:center;padding:20px 16px;background:#fff;margin-top:20px;font-size:.75rem;color:var(--text-muted);border-top:1px solid var(--border)}
+footer a{color:var(--primary);text-decoration:none;font-weight:600}
+
+@media(max-width:480px){
+  .product-info h3{font-size:.8rem;height:2.2rem}
+  .qty-input{width:40px}
+  .qty-btn{width:28px;height:28px}
+}
+</style>
+</head>
+<body>
+
+<!-- شاشة التحميل -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <div data-t="loading">جاري التحميل...</div>
+</div>
+
+<div id="noticeScreen"></div>
+
+<div id="appContainer" style="display:none;">
+
+  <header>
+    <div class="logo" id="logoBtn">
+      <img id="storeLogo" src="" alt="" style="display:none;" />
+      <span id="storeName"></span>
+    </div>
+    <div class="nav-icons">
+      <i class="fa-solid fa-magnifying-glass" id="searchToggle"></i>
+      <button class="lang-btn" id="langToggleBtn" type="button" title="Français / العربية">
+        <i class="fa-solid fa-globe"></i>
+        <span id="langBtnLabel">FR</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="searchContainer">
+    <input type="text" id="searchInput" data-t-placeholder="searchPlaceholder" placeholder="ابحث باسم المنتج..." />
+  </div>
+
+  <div class="banner">
+    <img id="coverImage" src="" alt="" />
+  </div>
+
+  <div class="categories-wrapper" id="categoriesWrapper">
+    <div class="categories-bar" id="categoriesBar">
+      <button class="cat-btn active" data-family="__all__" id="filterAllBtn">
+        <i class="fas fa-th-list"></i> <span data-t="all">الكل</span>
+        <span class="cat-count" id="countAll">0</span>
+      </button>
+      <button class="cat-btn discount-btn" data-family="__discounts__" id="filterDiscountsBtn">
+        <i class="fas fa-tags"></i> <span data-t="discounts">التخفيضات</span>
+        <span class="cat-count" id="countDiscounts">0</span>
+      </button>
+      <button class="cat-clear-btn" id="clearFilterBtn">
+        <i class="fas fa-times-circle"></i> <span data-t="cancel">إلغاء</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="wholesaleBox" class="wholesale-box">
+    <div class="info">
+      <div class="icon"><i class="fa-solid fa-crown"></i></div>
+      <div class="text">
+        <h3 id="wholesaleStatusTitle"></h3>
+        <p id="wholesaleStatusDesc"></p>
+      </div>
+    </div>
+    <div class="actions">
+      <input type="password" id="wholesaleInput" data-t-placeholder="wholesaleCode" placeholder="الرمز السري" dir="ltr" />
+      <button class="btn-activate" id="activateWholesaleBtn" data-t="activate">تفعيل</button>
+      <button class="btn-deactivate" id="deactivateWholesaleBtn" style="display:none;" data-t="deactivate">إلغاء</button>
+      <span id="wholesaleStatus" class="inactive" data-t="notActive">غير مفعل</span>
+    </div>
+  </div>
+
+  <div class="products-container" id="productsContainer"></div>
+  <div id="pagination"></div>
+
+  <button id="cartBtn">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span id="cartBadge" style="display:none;">0</span>
+  </button>
+
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <h3 data-t="cartTitle">🛒 سلة التسوق</h3>
+      <div id="cartItemsList"></div>
+      <div id="cartTotal"></div>
+      <input type="text" id="custName" class="form-control" data-t-placeholder="fullName" placeholder="الاسم الكامل" />
+      <input type="tel" id="custPhone" class="form-control" data-t-placeholder="phone" placeholder="رقم الهاتف" />
+      <div class="address-container">
+        <input type="text" id="custAddress" class="form-control" data-t-placeholder="address" placeholder="العنوان" />
+        <button type="button" id="locationBtn" class="location-btn">
+          <i class="fas fa-map-marker-alt"></i> <span data-t="location">الموقع</span>
+        </button>
+      </div>
+      <button class="btn-order" id="sendOrderBtn">
+        <i class="fab fa-whatsapp"></i> <span data-t="sendOrder">إرسال الطلب</span>
+      </button>
+      <button class="clear-cart-btn" id="clearCartBtn" data-t="clearCart">🗑️ مسح السلة</button>
+      <button style="width:100%;background:none;border:none;color:var(--text-muted);margin-top:12px;font-weight:600;cursor:pointer;font-family:var(--font);" id="closeCartBtn" data-t="close">إغلاق</button>
+    </div>
+  </div>
+
+  <div id="imageModal" class="modal">
+    <div class="modal-content">
+      <img id="modalImg" />
+    </div>
+  </div>
+
+  <footer>
+    <p><span id="footerStoreName"></span> &copy; <span id="footerYear"></span></p>
+    <p id="footerPhoneLine" style="display:none;"><i class="fa-solid fa-phone"></i> <a href="#" id="footerPhoneLink"></a></p>
+  </footer>
+
+</div>
+
+<!-- ═══════════════ 🌐 نظام الترجمة (بدون تغيير الاتجاه) ═══════════════ -->
+<script>
+const I18N = {
+  ar: {
+    loading: "جاري التحميل...",
+    searchPlaceholder: "ابحث باسم المنتج...",
+    all: "الكل",
+    discounts: "التخفيضات",
+    cancel: "إلغاء",
+    wholesaleCode: "الرمز السري",
+    activate: "تفعيل",
+    deactivate: "إلغاء",
+    notActive: "غير مفعل",
+    active: "✅ مفعل",
+    cartTitle: "🛒 سلة التسوق",
+    fullName: "الاسم الكامل",
+    phone: "رقم الهاتف",
+    address: "العنوان",
+    location: "الموقع",
+    sendOrder: "إرسال الطلب",
+    clearCart: "🗑️ مسح السلة",
+    close: "إغلاق",
+    discountBadge: "تخفيض",
+    wholesaleBadge: "جملة",
+    permanentDiscount: "تخفيض دائم",
+    timerLoading: "جاري...",
+    timerEnded: "انتهى!",
+    boxesLabel: "عدد العلب",
+    qtyLabel: "الكمية",
+    boxPrefix: "📦 العلبة: ",
+    unitWord: "وحدة",
+    noProducts: "لا توجد منتجات",
+    totalLabel: "المجموع: ",
+    emptyCart: "السلة فارغة",
+    boxWord: "علبة",
+    dayWord: "يوم",
+    wsTitleActive: "✅ تم تفعيل أسعار الجملة",
+    wsTitleInactive: "💎 أسعار الجملة",
+    wsDescActive: "الآن يمكنك الشراء بأسعار الجملة",
+    wsDescInactive: "👑 خاص بزبائن الجملة – أدخل الرمز السري",
+    wsBtnDisabled: "الطلبات غير مفعّلة",
+    wsBtnEnabled: "إرسال الطلب",
+    alertEnterCode: "أدخل الرمز السري",
+    alertCodeNotSet: "لم يتم ضبط الرمز السري من الإدارة",
+    alertWsActivated: "✅ تم تفعيل أسعار الجملة",
+    alertWrongCode: "❌ الرمز غير صحيح",
+    alertGeoNotSupported: "متصفحك لا يدعم تحديد الموقع",
+    alertGeoHttps: "⚠️ تحديد الموقع يعمل فقط على HTTPS.\nالموقع الحالي: ",
+    alertGeoDenied: "❌ تم رفض الإذن.\nافتح إعدادات المتصفح → الموقع → اسمح للموقع.",
+    alertGeoUnavailable: "❌ الموقع غير متاح حاليًا.\nتأكد من تشغيل GPS في هاتفك.",
+    alertGeoTimeout: "❌ استغرق الطلب وقتًا طويلًا.\nحاول مرة أخرى في مكان مفتوح.",
+    alertOrdersDisabled: "الطلبات غير مفعّلة",
+    alertFillAll: "يرجى ملء جميع البيانات",
+    alertOrderError: "خطأ: ",
+    noticeConfigMissingTitle: "ملف الإعدادات مفقود",
+    noticeConfigMissingMsg: "لم يتم العثور على ملف <code>config.js</code>.",
+    noticeConfigIncompleteTitle: "الإعدادات غير مكتملة",
+    noticeConfigIncompleteMsg: "افتح ملف <code>config.js</code> وضع فيه <b>Firebase Config</b>.",
+    noticeStoreNotReadyTitle: "المتجر قيد الإعداد",
+    noticeStoreNotReadyMsg: "لم يتم ضبط معلومات المتجر بعد.",
+    langBtnLabel: "FR"
+  },
+  fr: {
+    loading: "Chargement...",
+    searchPlaceholder: "Rechercher un produit...",
+    all: "Tout",
+    discounts: "Promotions",
+    cancel: "Annuler",
+    wholesaleCode: "Code secret",
+    activate: "Activer",
+    deactivate: "Désactiver",
+    notActive: "Désactivé",
+    active: "✅ Activé",
+    cartTitle: "🛒 Mon panier",
+    fullName: "Nom complet",
+    phone: "Téléphone",
+    address: "Adresse",
+    location: "Localisation",
+    sendOrder: "Envoyer la commande",
+    clearCart: "🗑️ Vider le panier",
+    close: "Fermer",
+    discountBadge: "Promo",
+    wholesaleBadge: "Gros",
+    permanentDiscount: "Promo permanente",
+    timerLoading: "Chargement...",
+    timerEnded: "Terminé !",
+    boxesLabel: "Nb de boîtes",
+    qtyLabel: "Quantité",
+    boxPrefix: "📦 Boîte : ",
+    unitWord: "unités",
+    noProducts: "Aucun produit",
+    totalLabel: "Total : ",
+    emptyCart: "Panier vide",
+    boxWord: "boîte",
+    dayWord: "j",
+    wsTitleActive: "✅ Prix de gros activés",
+    wsTitleInactive: "💎 Prix de gros",
+    wsDescActive: "Vous pouvez maintenant acheter en gros",
+    wsDescInactive: "👑 Réservé aux grossistes – Entrez le code secret",
+    wsBtnDisabled: "Commandes désactivées",
+    wsBtnEnabled: "Envoyer la commande",
+    alertEnterCode: "Entrez le code secret",
+    alertCodeNotSet: "Le code secret n'a pas été défini",
+    alertWsActivated: "✅ Prix de gros activés",
+    alertWrongCode: "❌ Code incorrect",
+    alertGeoNotSupported: "Votre navigateur ne supporte pas la géolocalisation",
+    alertGeoHttps: "⚠️ La géolocalisation fonctionne uniquement en HTTPS.\nProtocole actuel : ",
+    alertGeoDenied: "❌ Permission refusée.\nOuvrez les paramètres du navigateur → Localisation → Autoriser.",
+    alertGeoUnavailable: "❌ Position indisponible.\nVérifiez que le GPS est activé.",
+    alertGeoTimeout: "❌ Délai dépassé.\nRéessayez dans un endroit dégagé.",
+    alertOrdersDisabled: "Commandes désactivées",
+    alertFillAll: "Veuillez remplir tous les champs",
+    alertOrderError: "Erreur : ",
+    noticeConfigMissingTitle: "Fichier de configuration manquant",
+    noticeConfigMissingMsg: "Fichier <code>config.js</code> introuvable.",
+    noticeConfigIncompleteTitle: "Configuration incomplète",
+    noticeConfigIncompleteMsg: "Ouvrez <code>config.js</code> et ajoutez votre <b>Firebase Config</b>.",
+    noticeStoreNotReadyTitle: "Boutique en préparation",
+    noticeStoreNotReadyMsg: "Les informations de la boutique ne sont pas encore définies.",
+    langBtnLabel: "AR"
+  }
+};
+
+let LANG = localStorage.getItem('store_lang') || 'ar';
+window.currentLang = LANG;
+
+function t(key) {
+  return (I18N[LANG] && I18N[LANG][key]) || (I18N.ar && I18N.ar[key]) || key;
+}
+window.t = t;
+
+function applyTranslations() {
+  /* ✅ لا نغيّر lang/dir — المتجر يبقى RTL دائمًا */
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    const val = I18N[LANG][key];
+    if (val) el.textContent = val;
+  });
+  document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-t-placeholder');
+    const val = I18N[LANG][key];
+    if (val) el.placeholder = val;
+  });
+  const lb = document.getElementById('langBtnLabel');
+  if (lb) lb.textContent = t('langBtnLabel');
+}
+window.applyTranslations = applyTranslations;
+
+function toggleLang() {
+  LANG = LANG === 'ar' ? 'fr' : 'ar';
+  localStorage.setItem('store_lang', LANG);
+  location.reload();
+}
+window.toggleLang = toggleLang;
+
+applyTranslations();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getDatabase, ref, onValue, get, push, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+const $ = id => document.getElementById(id);
+
+// ═══════════════ 1) التحقق من config.js ═══════════════
+const BOOT = window.STORE_BOOTSTRAP;
+const loadingScreen = $("loadingScreen");
+const noticeScreen = $("noticeScreen");
+
+function showNotice(icon, title, message) {
+  loadingScreen.style.display = "none";
+  noticeScreen.style.display = "flex";
+  noticeScreen.innerHTML = `<div class="ico">${icon}</div><h2>${title}</h2><p>${message}</p>`;
+}
+
+if (!BOOT) {
+  showNotice("⚠️", t('noticeConfigMissingTitle'), t('noticeConfigMissingMsg'));
+  throw new Error("config.js missing");
+}
+const fc = BOOT.firebaseConfig || {};
+if (!fc.apiKey || fc.apiKey.includes("YOUR_")) {
+  showNotice("🔑", t('noticeConfigIncompleteTitle'), t('noticeConfigIncompleteMsg'));
+  throw new Error("firebaseConfig not set");
+}
+
+// ═══════════════ 2) تهيئة Firebase ═══════════════
+const app = initializeApp(fc);
+const db = getDatabase(app);
+const auth = getAuth(app);
+signInAnonymously(auth).catch(err => console.warn("Auth:", err.message));
+
+// ═══════════════ 3) الحالة العامة ═══════════════
+let storeInfo = {
+  name: "", logoUrl: "", phoneInvoice: "", address: "",
+  whatsappNumber: "", enableWhatsapp: false, enableLocation: false, currency: ""
+};
+let storeConfigured = false;
+let wholesaleCode = null;
+let allProducts = [];
+let allDiscounts = {};
+let familiesList = [];
+let cart = [];
+try { cart = JSON.parse(localStorage.getItem('cart_store')) || []; } catch(e){ cart=[]; }
+let currentFamilyFilter = "__all__";
+let currentPage = 1;
+const PER_PAGE = 20;
+let searchTerm = '';
+let isWholesaleActive = localStorage.getItem('wholesale_active') === 'true';
+let booted = false;
+
+const escapeHtml = s => !s ? '' : String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const fmt = n => Number(n || 0).toLocaleString('fr-FR');
+
+/* ✅ تصحيح رقم الواتساب */
+function normalizeWhatsappNumber(raw) {
+  if (!raw) return "";
+  let num = String(raw).replace(/[^0-9]/g, "");
+  if (!num) return "";
+  num = num.replace(/^0+/, "");
+  if (num.startsWith("00213")) num = num.substring(2);
+  if (!num.startsWith("213")) num = "213" + num;
+  return num;
+}
+
+/* ✅ عرض العملة حسب اللغة: دج (عربي) / DA (فرنسي) */
+function curLbl() {
+  const c = storeInfo.currency || 'دج';
+  const lng = window.currentLang || 'ar';
+  if (lng === 'fr' && (c === 'دج' || c === 'DZD' || c === 'دينار')) return 'DA';
+  return c;
+}
+
+/* ✅ فحص صارم للخصم */
+function isDiscountActive(disc) {
+  if (!disc || typeof disc !== 'object') return false;
+  const active = (disc.isActive === true || disc.isActive === 'true' || disc.isActive === 1);
+  if (!active) return false;
+  const unlimited = (disc.unlimited === true || disc.unlimited === 'true' || disc.unlimited === 1);
+  if (unlimited) return true;
+  if (!disc.endDate) return false;
+  const endT = new Date(disc.endDate).getTime();
+  return !isNaN(endT) && endT > Date.now();
+}
+function getDiscountPrice(disc) {
+  if (!disc) return null;
+  const p = Number(disc.newPrice);
+  return (isNaN(p) || p <= 0) ? null : p;
+}
+
+// ═══════════════ 4) تطبيق معلومات المتجر ═══════════════
+function applyStoreInfo() {
+  if (!storeConfigured) {
+    showNotice("🏪", t('noticeStoreNotReadyTitle'), t('noticeStoreNotReadyMsg'));
+    return;
+  }
+  document.title = storeInfo.name;
+  $("storeName").textContent = storeInfo.name;
+  $("footerStoreName").textContent = storeInfo.name;
+  $("footerYear").textContent = new Date().getFullYear();
+
+  const lg = $("storeLogo");
+  if (storeInfo.logoUrl) { lg.src = storeInfo.logoUrl; lg.style.display = "inline-block"; lg.onerror = () => lg.style.display = "none"; }
+  else lg.style.display = "none";
+
+  if (storeInfo.phoneInvoice) {
+    $("footerPhoneLine").style.display = "block";
+    const lk = $("footerPhoneLink");
+    lk.href = "tel:" + storeInfo.phoneInvoice;
+    lk.textContent = storeInfo.phoneInvoice;
+  } else $("footerPhoneLine").style.display = "none";
+
+  const sb = $("sendOrderBtn");
+  const ok = storeInfo.enableWhatsapp && storeInfo.whatsappNumber;
+  sb.disabled = !ok;
+  sb.innerHTML = ok
+    ? '<i class="fab fa-whatsapp"></i> <span>' + t('wsBtnEnabled') + '</span>'
+    : '<i class="fas fa-ban"></i> <span>' + t('wsBtnDisabled') + '</span>';
+
+  $("locationBtn").style.display = storeInfo.enableLocation ? "flex" : "none";
+  $("cartBtn").classList.add("show");
+}
+
+// ═══════════════ 5) مراقبة Firebase ═══════════════
+onValue(ref(db, 'store/info'), (snap) => {
+  const d = snap.val() || {};
+  storeConfigured = !!(d && d.name && String(d.name).trim());
+  storeInfo = {
+    name: d.name || "", logoUrl: d.logoUrl || "", phoneInvoice: d.phoneInvoice || "",
+    address: d.address || "", whatsappNumber: d.whatsappNumber || "",
+    enableWhatsapp: d.enableWhatsapp === true,
+    enableLocation: d.enableLocation === true,
+    currency: d.currency || ""
+  };
+  applyStoreInfo();
+  if (!booted && storeConfigured) { booted = true; bootApp(); }
+});
+
+onValue(ref(db, 'store/cover'), (snap) => {
+  const d = snap.val();
+  const img = $("coverImage");
+  if (d && d.url) { img.src = d.url; img.style.display = "block"; }
+  else { img.src = ""; img.style.display = "none"; }
+});
+
+onValue(ref(db, 'store/wholesaleCode'), (snap) => {
+  const d = snap.val();
+  wholesaleCode = d ? (d.code || null) : null;
+});
+
+onValue(ref(db, 'products'), (snap) => {
+  const d = snap.val() || {};
+  allProducts = Object.entries(d).map(([id, p]) => ({ id, ...p })).filter(p => !p.hidden);
+  refreshCartPrices();
+  updateFamilyCounts();
+  applyFiltersAndRender();
+});
+
+onValue(ref(db, 'discounts'), (snap) => {
+  try {
+    const d = snap.val() || {};
+    const now = Date.now();
+    Object.entries(d).forEach(([pid, disc]) => {
+      if (!disc || typeof disc !== 'object') return;
+      const active = (disc.isActive === true || disc.isActive === 'true');
+      const unlimited = (disc.unlimited === true || disc.unlimited === 'true');
+      if (active && !unlimited && disc.endDate) {
+        const endT = new Date(disc.endDate).getTime();
+        if (!isNaN(endT) && endT < now) {
+          update(ref(db, 'discounts/' + pid), { isActive: false }).catch(()=>{});
+        }
+      }
+    });
+    allDiscounts = d;
+    refreshCartPrices();
+    applyFiltersAndRender();
+    startCountdownTimers();
+  } catch (err) { console.error('[Discounts]', err); }
+});
+
+onValue(ref(db, 'families'), (snap) => {
+  const d = snap.val();
+  familiesList = d ? Object.values(d).map(v => typeof v === 'string' ? v : (v.name || v)) : [];
+  renderCategoryButtons();
+  updateFamilyCounts();
+});
+
+// ═══════════════ 6) العائلات ═══════════════
+function renderCategoryButtons() {
+  const bar = $("categoriesBar");
+  bar.querySelectorAll('.cat-btn:not(#filterAllBtn):not(#filterDiscountsBtn)').forEach(el => el.remove());
+  if (familiesList.length || allProducts.length) $("categoriesWrapper").classList.add("show");
+  familiesList.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.dataset.family = name;
+    btn.innerHTML = `<i class="fas fa-tag"></i> ${escapeHtml(name)}<span class="cat-count" id="count_${CSS.escape(name)}">0</span>`;
+    btn.addEventListener('click', () => setFamily(name));
+    bar.insertBefore(btn, $("clearFilterBtn"));
+  });
+  updateActiveCategory();
+}
+
+function updateActiveCategory() {
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.family === currentFamilyFilter);
+  });
+  const clear = $("clearFilterBtn");
+  if (currentFamilyFilter !== "__all__") {
+    clear.classList.add('show');
+    const label = currentFamilyFilter === "__discounts__" ? t('discounts') : currentFamilyFilter;
+    clear.innerHTML = `<i class="fas fa-times-circle"></i> <span>✕ ${escapeHtml(label)}</span>`;
+  } else clear.classList.remove('show');
+}
+
+function updateFamilyCounts() {
+  $("countAll").textContent = allProducts.filter(p => !p.hidden).length;
+  const dc = allProducts.filter(p => !p.hidden && isDiscountActive(allDiscounts[p.id])).length;
+  $("countDiscounts").textContent = dc;
+  familiesList.forEach(f => {
+    const c = allProducts.filter(p => !p.hidden && p.family === f).length;
+    const el = document.getElementById('count_' + CSS.escape(f));
+    if (el) el.textContent = c;
+  });
+}
+
+function setFamily(f) { currentFamilyFilter = f; currentPage = 1; updateActiveCategory(); applyFiltersAndRender(); }
+$("filterAllBtn").addEventListener('click', () => setFamily("__all__"));
+$("filterDiscountsBtn").addEventListener('click', () => setFamily("__discounts__"));
+$("clearFilterBtn").addEventListener('click', () => setFamily("__all__"));
+
+// ═══════════════ 7) الفلترة والعرض ═══════════════
+function applyFiltersAndRender() {
+  if (!storeConfigured) return;
+  let filtered = allProducts.filter(p => !p.hidden);
+  if (currentFamilyFilter === "__discounts__") {
+    filtered = filtered.filter(p => isDiscountActive(allDiscounts[p.id]));
+  } else if (currentFamilyFilter !== "__all__") {
+    filtered = filtered.filter(p => p.family === currentFamilyFilter);
+  }
+  if (searchTerm.trim()) {
+    const t2 = searchTerm.toLowerCase().trim();
+    filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(t2));
+  }
+  renderProducts(filtered);
+  updateFamilyCounts();
+}
+
+function getEffectivePrice(p) {
+  const d = allDiscounts[p.id];
+  const onSale = isDiscountActive(d);
+  const base = Number(p.price) || 0;
+  const salePrice = getDiscountPrice(d);
+  if (onSale && salePrice !== null) return salePrice;
+  const wh = (p.wholesalePrice !== undefined && p.wholesalePrice !== null && !isNaN(p.wholesalePrice) && p.wholesalePrice > 0) ? Number(p.wholesalePrice) : null;
+  if (isWholesaleActive && wh !== null) return wh;
+  return base;
+}
+
+function renderProducts(filtered) {
+  const c = $("productsContainer");
+  c.innerHTML = '';
+  const start = (currentPage - 1) * PER_PAGE;
+  const page = filtered.slice(start, start + PER_PAGE);
+  if (!page.length) {
+    c.innerHTML = `<div class="no-data"><i class="fas fa-box-open"></i><div>${t('noProducts')}</div></div>`;
+    renderPagination(0);
+    return;
+  }
+  page.forEach(p => {
+    const d = allDiscounts[p.id];
+    const onSale = isDiscountActive(d);
+    const salePrice = getDiscountPrice(d);
+    const base = Number(p.price) || 0;
+    const wh = (p.wholesalePrice !== undefined && p.wholesalePrice !== null && !isNaN(p.wholesalePrice) && p.wholesalePrice > 0) ? Number(p.wholesalePrice) : null;
+
+    let display, strike, badgeText, priceClass;
+    if (onSale && salePrice !== null) {
+      display = salePrice; strike = base;
+      badgeText = t('discountBadge'); priceClass = 'discount-price';
+    } else if (isWholesaleActive && wh !== null) {
+      display = wh; strike = base;
+      badgeText = t('wholesaleBadge'); priceClass = 'wholesale-price';
+    } else {
+      display = base; strike = null; badgeText = null; priceClass = 'current-price';
+    }
+
+    const inCart = cart.find(i => i.id === p.id);
+    const qtyBoxes = inCart ? (inCart.quantityBoxes || 0) : 0;
+    const qpb = (p.quantityPerBox && p.quantityPerBox > 0) ? Number(p.quantityPerBox) : null;
+    const cur = curLbl();
+
+    let priceHtml;
+    if (strike !== null) {
+      priceHtml = `<span class="retail-price">${fmt(strike)} ${cur}</span>
+                   <span class="${priceClass}">${fmt(display)} ${cur} <span class="badge">${badgeText}</span></span>`;
+    } else {
+      priceHtml = `<span class="current-price">${fmt(display)} ${cur}</span>`;
+    }
+
+    const ribbon = onSale ? `<div class="promo-ribbon">PROMO</div>` : '';
+    let badge = '';
+    if (onSale) badge = d.unlimited
+      ? `<div class="sale-badge infinity"><i class="fas fa-infinity"></i></div>`
+      : `<div class="sale-badge"><i class="fas fa-percent"></i></div>`;
+
+    let timer = '';
+    if (onSale && d.unlimited) {
+      timer = `<div class="discount-timer unlimited"><i class="fas fa-infinity"></i> ${t('permanentDiscount')}</div>`;
+    } else if (onSale && d.endDate) {
+      timer = `<div class="discount-timer" id="timer_${p.id}" data-end="${d.endDate}"><i class="far fa-clock"></i> <span class="time-left">${t('timerLoading')}</span></div>`;
+    }
+
+    const qtyLabel = qpb ? t('boxesLabel') : t('qtyLabel');
+    const boxQtyHtml = qpb ? `<span class="product-box-qty">${t('boxPrefix')}${qpb} ${t('unitWord')}</span>` : '';
+
+    const card = document.createElement('div');
+    card.className = 'product-card' + (onSale ? ' on-sale' : '');
+    card.innerHTML = `
+      <div class="product-image-wrapper">
+        <img src="${p.imageUrl || 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f4e6.svg'}" alt="" loading="lazy" data-img="${p.imageUrl || ''}">
+        ${ribbon}${badge}
+      </div>
+      <div class="product-info">
+        <h3>${escapeHtml(p.name)}</h3>
+        <div class="product-price">${priceHtml}</div>
+        ${p.family ? `<span class="product-family-tag">🏷️ ${escapeHtml(p.family)}</span>` : ''}
+        ${boxQtyHtml}${timer}
+        <div class="qty-controls">
+          <span class="qty-label">${qtyLabel}:</span>
+          <button class="qty-btn" data-action="minus" data-id="${p.id}">−</button>
+          <input type="number" class="qty-input" value="${qtyBoxes}" min="0" data-id="${p.id}">
+          <button class="qty-btn" data-action="plus" data-id="${p.id}">+</button>
+        </div>
+      </div>`;
+    c.appendChild(card);
+  });
+
+  c.querySelectorAll('.product-image-wrapper img').forEach(img => {
+    img.addEventListener('click', () => {
+      const url = img.dataset.img;
+      if (url) { $("modalImg").src = url; $("imageModal").classList.add('show'); }
+    });
+    img.addEventListener('error', () => { img.removeAttribute('src'); });
+  });
+  c.querySelectorAll('.qty-btn').forEach(b => b.addEventListener('click', () => {
+    updateQty(b.dataset.id, b.dataset.action === 'plus' ? 1 : -1);
+  }));
+  c.querySelectorAll('.qty-input').forEach(inp => inp.addEventListener('change', () => {
+    manualQty(inp.dataset.id, inp.value);
+  }));
+  updateCartBadge();
+  renderPagination(filtered.length);
+  page.forEach(p => {
+    const d = allDiscounts[p.id];
+    if (isDiscountActive(d) && d.endDate) {
+      const tel = document.getElementById('timer_' + p.id);
+      if (tel) updateTimer(tel);
+    }
+  });
+}
+
+// ═══════════════ 8) السلة ═══════════════
+function updateQty(id, change) {
+  const p = allProducts.find(x => x.id === id); if (!p) return;
+  const price = getEffectivePrice(p);
+  const qpb = (p.quantityPerBox && p.quantityPerBox > 0) ? Number(p.quantityPerBox) : 1;
+  const idx = cart.findIndex(x => x.id === id);
+  let boxes = idx > -1 ? cart[idx].quantityBoxes + change : (change > 0 ? change : 0);
+  if (boxes <= 0) { if (idx > -1) cart.splice(idx, 1); }
+  else {
+    const item = { id, name: p.name, price, quantityBoxes: boxes, quantity: boxes * qpb, qtyPerBox: qpb };
+    if (idx > -1) cart[idx] = item; else cart.push(item);
+  }
+  saveCart();
+}
+function manualQty(id, val) {
+  const p = allProducts.find(x => x.id === id); if (!p) return;
+  const boxes = Math.max(0, parseInt(val) || 0);
+  const price = getEffectivePrice(p);
+  const qpb = (p.quantityPerBox && p.quantityPerBox > 0) ? Number(p.quantityPerBox) : 1;
+  const idx = cart.findIndex(x => x.id === id);
+  if (boxes <= 0) { if (idx > -1) cart.splice(idx, 1); }
+  else {
+    const item = { id, name: p.name, price, quantityBoxes: boxes, quantity: boxes * qpb, qtyPerBox: qpb };
+    if (idx > -1) cart[idx] = item; else cart.push(item);
+  }
+  saveCart();
+}
+function saveCart() {
+  localStorage.setItem('cart_store', JSON.stringify(cart));
+  applyFiltersAndRender();
+}
+function refreshCartPrices() {
+  let changed = false;
+  cart.forEach(item => {
+    const p = allProducts.find(x => x.id === item.id);
+    if (p) {
+      const newPrice = getEffectivePrice(p);
+      if (item.price !== newPrice) { item.price = newPrice; changed = true; }
+    }
+  });
+  if (changed) localStorage.setItem('cart_store', JSON.stringify(cart));
+}
+function updateCartBadge() {
+  const count = cart.reduce((a, b) => a + (b.quantity || 0), 0);
+  const b = $("cartBadge");
+  b.textContent = count;
+  b.style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+$("cartBtn").addEventListener('click', () => {
+  refreshCartPrices();
+  const list = $("cartItemsList");
+  list.innerHTML = '';
+  let total = 0;
+  if (!cart.length) list.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:20px;">${t('emptyCart')}</div>`;
+  else {
+    cart.forEach(item => {
+      const st = item.price * item.quantity;
+      total += st;
+      const qtyText = item.qtyPerBox > 1
+        ? `${item.quantityBoxes} ${t('boxWord')} (${item.quantity} ${t('unitWord')})`
+        : `${item.quantity} ${t('unitWord')}`;
+      list.innerHTML += `<div class="cart-item"><span>${escapeHtml(item.name)} (${qtyText})</span><span>${fmt(st)} ${curLbl()}</span></div>`;
+    });
+  }
+  $("cartTotal").textContent = `${t('totalLabel')}${fmt(total)} ${curLbl()}`;
+  $("cartModal").classList.add('show');
+});
+$("closeCartBtn").addEventListener('click', () => $("cartModal").classList.remove('show'));
+$("clearCartBtn").addEventListener('click', () => { cart = []; saveCart(); $("cartModal").classList.remove('show'); });
+
+// ═══════════════ 9) الجملة ═══════════════
+$("logoBtn").addEventListener('click', () => {
+  const b = $("wholesaleBox");
+  b.style.display = b.style.display === 'flex' ? 'none' : 'flex';
+});
+$("activateWholesaleBtn").addEventListener('click', () => {
+  const input = $("wholesaleInput").value.trim();
+  if (!input) return alert(t('alertEnterCode'));
+  if (!wholesaleCode) return alert(t('alertCodeNotSet'));
+  if (input === wholesaleCode) {
+    isWholesaleActive = true;
+    localStorage.setItem('wholesale_active', 'true');
+    cart = []; saveCart();
+    applyWholesaleUI(true);
+    alert(t('alertWsActivated'));
+  } else alert(t('alertWrongCode'));
+});
+$("deactivateWholesaleBtn").addEventListener('click', () => {
+  isWholesaleActive = false;
+  localStorage.setItem('wholesale_active', 'false');
+  cart = []; saveCart();
+  applyWholesaleUI(false);
+});
+function applyWholesaleUI(active) {
+  const status = $("wholesaleStatus");
+  const title = $("wholesaleStatusTitle");
+  const desc = $("wholesaleStatusDesc");
+  const deact = $("deactivateWholesaleBtn");
+  if (active) {
+    document.body.classList.add('wholesale-active');
+    status.className = 'active'; status.textContent = t('active');
+    title.textContent = t('wsTitleActive');
+    desc.textContent = t('wsDescActive');
+    deact.style.display = 'inline-block';
+  } else {
+    document.body.classList.remove('wholesale-active');
+    status.className = 'inactive'; status.textContent = t('notActive');
+    title.textContent = t('wsTitleInactive');
+    desc.textContent = t('wsDescInactive');
+    deact.style.display = 'none';
+  }
+}
+
+// ═══════════════ 10) المؤقتات ═══════════════
+function updateTimer(el) {
+  if (!el) return;
+  const span = el.querySelector('.time-left'); if (!span) return;
+  const diff = new Date(el.dataset.end).getTime() - Date.now();
+  if (diff <= 0) { span.textContent = t('timerEnded'); el.style.background = '#e5e7eb'; el.style.color = '#6b7280'; return; }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  span.textContent = (d > 0 ? d + t('dayWord') + ' ' : '') + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function startCountdownTimers() {
+  setInterval(() => document.querySelectorAll('.discount-timer[data-end]').forEach(updateTimer), 1000);
+}
+
+// ═══════════════ 11) الموقع ═══════════════
+$("locationBtn").addEventListener('click', () => {
+  if (!navigator.geolocation) return alert(t('alertGeoNotSupported'));
+  if (location.protocol !== "https:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
+    return alert(t('alertGeoHttps') + location.protocol);
+  }
+  const btn = $("locationBtn"); const orig = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const url = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+      const inp = $("custAddress");
+      inp.value = inp.value.trim() ? inp.value + " | " + url : url;
+      btn.disabled = false; btn.innerHTML = orig;
+    },
+    err => {
+      btn.disabled = false; btn.innerHTML = orig;
+      let msg = "";
+      switch(err.code) {
+        case 1: msg = t('alertGeoDenied'); break;
+        case 2: msg = t('alertGeoUnavailable'); break;
+        case 3: msg = t('alertGeoTimeout'); break;
+      }
+      alert(msg);
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+});
+
+// ═══════════════ 12) إرسال الطلب ═══════════════
+$("sendOrderBtn").addEventListener('click', async () => {
+  if (!(storeInfo.enableWhatsapp && storeInfo.whatsappNumber)) return alert(t('alertOrdersDisabled'));
+  const name = $("custName").value.trim();
+  const phone = $("custPhone").value.trim();
+  const address = $("custAddress").value.trim();
+  if (!name || !phone || !address || !cart.length) return alert(t('alertFillAll'));
+
+  refreshCartPrices();
+
+  const total = cart.reduce((a, b) => a + b.price * b.quantity, 0);
+  let itemsText = "";
+  cart.forEach(i => {
+    const detail = (i.qtyPerBox > 1) ? `${i.quantityBoxes}x${i.qtyPerBox} ${i.name}` : `${i.quantity} × ${i.name}`;
+    itemsText += `${detail} × ${i.price} = ${(i.price * i.quantity)}\n`;
+  });
+  let mapsText = "", addressText = "";
+  if (address.includes("maps.google.com")) {
+    const parts = address.split('|');
+    const addr = parts[0].trim();
+    const map = parts.find(p => p.includes("maps.google.com")) || "";
+    if (addr) addressText = `Adresse : ${addr}\n`;
+    if (map) mapsText = `Google maps : ${map.trim()}\n`;
+  } else addressText = `Adresse : ${address}\n`;
+
+  const msg = `\u202ANouvelle demande.\nDe: ${name}\nN°: ${phone}\n${addressText}${mapsText}\n${itemsText}\nTotal: ${total} ${storeInfo.currency||''}\n📅 ${new Date().toLocaleString('fr-FR')}\u202C`;
+
+  try {
+    await push(ref(db, 'whatsappOrders'), {
+      customerName: name, phone, address,
+      items: cart.map(i => ({ name: i.name, price: i.price, quantity: i.quantity, quantityBoxes: i.quantityBoxes, qtyPerBox: i.qtyPerBox })),
+      totalPrice: total, timestamp: Date.now(), status: "pending"
+    });
+    const waNumber = normalizeWhatsappNumber(storeInfo.whatsappNumber);
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+    cart = []; saveCart();
+    $("custName").value = ''; $("custPhone").value = ''; $("custAddress").value = '';
+    $("cartModal").classList.remove('show');
+  } catch (e) { alert(t('alertOrderError') + e.message); }
+});
+
+// ═══════════════ 13) الترقيم ═══════════════
+function renderPagination(totalItems) {
+  const p = $("pagination"); p.innerHTML = '';
+  const total = Math.ceil(totalItems / PER_PAGE);
+  if (total <= 1) return;
+  const add = (txt, pg, active = false, disabled = false) => {
+    const b = document.createElement('button');
+    b.textContent = txt;
+    if (active) b.classList.add('active-page');
+    if (disabled) b.disabled = true;
+    b.addEventListener('click', () => { if (!disabled) { currentPage = pg; applyFiltersAndRender(); window.scrollTo(0,0); } });
+    p.appendChild(b);
+  };
+  add('‹', currentPage - 1, false, currentPage === 1);
+  add('1', 1, currentPage === 1);
+  if (currentPage > 3) p.insertAdjacentHTML('beforeend', '<span style="padding:0 6px;color:#64748b;">…</span>');
+  for (let i = Math.max(2, currentPage - 3); i <= Math.min(total - 1, currentPage + 3); i++) add(i, i, i === currentPage);
+  if (currentPage < total - 2) p.insertAdjacentHTML('beforeend', '<span style="padding:0 6px;color:#64748b;">…</span>');
+  if (total > 1) add(total, total, currentPage === total);
+  add('›', currentPage + 1, false, currentPage === total);
+}
+
+// ═══════════════ 14) البحث ═══════════════
+$("searchToggle").addEventListener('click', () => $("searchContainer").classList.toggle('active'));
+$("searchInput").addEventListener('input', e => { searchTerm = e.target.value; currentPage = 1; applyFiltersAndRender(); });
+
+// ═══════════════ 15) زر اللغة ═══════════════
+$("langToggleBtn").addEventListener('click', () => window.toggleLang());
+
+// ═══════════════ 16) إغلاق المودالات ═══════════════
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// ═══════════════ 17) الإقلاع ═══════════════
+function bootApp() {
+  loadingScreen.style.display = 'none';
+  $("appContainer").style.display = 'block';
+  if (isWholesaleActive && wholesaleCode) applyWholesaleUI(true); else applyWholesaleUI(false);
+  updateCartBadge();
+}
+</script>
+</body>
+</html>
